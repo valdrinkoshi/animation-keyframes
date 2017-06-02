@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+  <title>animation-keyframes demo</title>
+
+  <script src="../../webcomponentsjs/webcomponents-loader.js"></script>
+
+  <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+  <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+  <link rel="import" href="../../paper-input/paper-input.html">
+  <link rel="import" href="../../paper-button/paper-button.html">
+  <link rel="import" href="../../paper-dropdown-menu/paper-dropdown-menu.html">
+  <link rel="import" href="../../paper-listbox/paper-listbox.html">
+  <link rel="import" href="../../paper-item/paper-item.html">
+  <link rel="import" href="../animation-keyframes.html">
+
+  <custom-style>
+    <style is="custom-style" include="demo-pages-shared-styles">
+      demo-snippet {
+        --demo-snippet-demo: {
+          height: 0;
+          padding: 0;
+        }
+        --demo-snippet-code: {
+          max-height: 300px;
+        }
+      }
+
+      #wrapper {
+        margin-top: 1rem;
+        outline: 1px solid lightgray;
+      }
+
+      #content {
+        padding: 10px;
+      }
+
+      #wrapper,
+      #content {
+        transform-origin: top left;
+        animation-delay: 400ms;
+        animation-fill-mode: both;
+      }
+
+      #wrapper:not([play]),
+      #wrapper:not([play]) #content {
+        animation-name: none !important;
+      }
+    </style>
+  </custom-style>
+</head>
+
+<body class="centered">
+  <dom-bind>
+    <template>
+      <h2>Basic &lt;animation-keyframes&gt; demo</h2>
+      <p>&lt;animation-keyframes&gt; generates keyframes for performant expand/collapse. See more deails on this technique
+        <a href="https://developers.google.com/web/updates/2017/03/performant-expand-and-collapse">here</a>.</p>
+
+      <p>
+        <paper-input name="animationName" required label="animation-name" value="[[animationName]]" on-value-changed="validateAndUpdateValue"
+          allowed-pattern="[a-zA-Z]" minlength="1"></paper-input>
+        <paper-input name="duration" type="number" required label="duration" value="[[duration]]" on-value-changed="validateAndUpdateValue"
+          allowed-pattern="[0-9]" max="5000" min="2"></paper-input>
+        <paper-dropdown-menu label="preset" selected-item-label="{{preset}}" no-animations>
+          <paper-listbox slot="dropdown-content" selected="0">
+            <paper-item>vertical-expand</paper-item>
+            <paper-item>vertical-collapse</paper-item>
+            <paper-item>horizontal-expand</paper-item>
+            <paper-item>horizontal-collapse</paper-item>
+            <paper-item>expand</paper-item>
+            <paper-item>collapse</paper-item>
+          </paper-listbox>
+        </paper-dropdown-menu>
+      </p>
+
+      <animation-keyframes animation-name="[[animationName]]" duration="[[duration]]" preset="[[preset]]" on-keyframes-changed="updateMarkdown"></animation-keyframes>
+      <h3>&lt;animation-keyframes&gt; generates this stylesheet for you.</h3>
+
+      <i>Consider copying it and saving this as a static resource.</i>
+      <p>
+        <code>[[animationName]].css: <span id="count"></span></code>
+      </p>
+
+      <demo-snippet id="snippet"></demo-snippet>
+
+      <h3>Apply the animation classes</h3>
+      <p>
+        <b><code>[[animationName]]</code></b> class to the wrapper element, and
+        <b><code>[[animationName]]Inverse</code></b> class to the content.
+      </p>
+      <paper-button raised on-tap="play">Play animation</paper-button>
+      <div id="wrapper" class$="[[animationName]]" on-animationend="stop">
+        <div id="content" contenteditable class$="[[computeInversedName(animationName)]]">
+          <h3>Performant [[preset]] animation!</h3>
+          <p>animation-keyframes generated the keyframes for this animation.</p>
+          <ul>
+            <li>item 1</li>
+            <li>item 2</li>
+            <li>item 3</li>
+          </ul>
+        </div>
+      </div>
+    </template>
+  </dom-bind>
+  <script>
+    const domBind = document.querySelector('dom-bind');
+
+    domBind.updateMarkdown = (event) => {
+      const keyframes = event.target.keyframes || '';
+      snippet._markdown = keyframes ? '```css' + keyframes + '```' : '';
+      count.textContent = `${keyframes.length} chars, ${keyframes.split(/\n/).length - 1} lines.`;
+    };
+
+    domBind.validateAndUpdateValue = (event) => {
+      const input = event.target;
+      if (input.validate())
+        domBind[input.name] = input.value;
+    };
+
+    domBind.computeInversedName = (animationName) => animationName + 'Inverse';
+    domBind.play = () => requestAnimationFrame(() => wrapper.setAttribute('play', ''));
+    domBind.stop = () => wrapper.removeAttribute('play');
+
+    addEventListener('WebComponentsReady', () => domBind.setProperties({
+      animationName: 'myAnimation',
+      duration: 700
+    }));
+  </script>
+</body>
+
+</html>

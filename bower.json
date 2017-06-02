@@ -1,0 +1,28 @@
+{
+  "name": "animation-keyframes",
+  "main": "animation-keyframes.html",
+  "version": "0.0.1",
+  "license": "MIT",
+  "keywords": [
+    "web-components",
+    "webcomponents"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^2"
+  },
+  "devDependencies": {
+    "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^2",
+    "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^2",
+    "paper-listbox": "PolymerElements/paper-listbox#^2",
+    "paper-item": "PolymerElements/paper-item#^2",
+    "paper-button": "PolymerElements/paper-button#^2",
+    "paper-input": "PolymerElements/paper-input#^2",
+    "web-component-tester": "^6",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^1"
+  }
+}

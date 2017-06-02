@@ -1,0 +1,21 @@
+{
+  "name": "animation-keyframes",
+  "main": "animation-keyframes.html",
+  "version": "0.0.1",
+  "license": "MIT",
+  "keywords": [
+    "web-components",
+    "webcomponents"
+  ],
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "install": "polymer install",
+    "start": "polymer serve",
+    "test": "polymer test"
+  },
+  "devDependencies": {
+    "polymer-cli": "^1"
+  }
+}
