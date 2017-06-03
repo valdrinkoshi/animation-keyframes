@@ -19,6 +19,7 @@ repo="animation-keyframes"
 branch="master" # default to master when branch isn't specified
 
 # make folder (same as input, no checking!)
+rm -rf $repo
 mkdir $repo
 git clone https://github.com/$org/$repo.git --single-branch
 
@@ -38,7 +39,7 @@ git show ${branch}:bower.json > bower.json
 # install the bower deps and also this repo so we can copy the demo
 bower install
 bower install $org/$repo#$branch
-mv bower_components/$repo/* .
+echo "<META http-equiv="refresh" content=\"0;URL=bower_components/$repo/demo/\">" >index.html
 
 # send it all to github
 git add -A .
