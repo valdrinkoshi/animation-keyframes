@@ -32,11 +32,15 @@
 
       #wrapper {
         margin-top: 1rem;
-        outline: 1px solid lightgray;
+        border: 1px solid lightgray;
       }
 
       #content {
         padding: 10px;
+      }
+
+      #custom:not([visible]) {
+        display: none;
       }
 
       #wrapper,
@@ -65,7 +69,9 @@
         <paper-input name="animationName" required label="animation-name" value="[[animationName]]" on-value-changed="validateAndUpdateValue"
           allowed-pattern="[a-zA-Z]" minlength="1"></paper-input>
         <paper-input name="duration" type="number" required label="duration" value="[[duration]]" on-value-changed="validateAndUpdateValue"
-          allowed-pattern="[0-9]" max="5000" min="2"></paper-input>
+          allowed-pattern="[0-9]" max="10000" min="2"></paper-input>
+        <paper-input name="fps" type="number" required label="Frames per second" value="[[fps]]" on-value-changed="validateAndUpdateValue"
+          allowed-pattern="[0-9]" max="150" min="2"></paper-input>
         <paper-dropdown-menu label="preset" selected-item-label="{{preset}}" no-animations>
           <paper-listbox slot="dropdown-content" selected="0">
             <paper-item>vertical-expand</paper-item>
@@ -74,11 +80,23 @@
             <paper-item>horizontal-collapse</paper-item>
             <paper-item>expand</paper-item>
             <paper-item>collapse</paper-item>
+            <paper-item>custom</paper-item>
           </paper-listbox>
         </paper-dropdown-menu>
+        <div id="custom" visible$="[[showCustom(preset)]]">
+          <paper-input name="fromScaleX" type="number" required label="From scale x" value="[[fromScaleX]]" on-value-changed="validateAndUpdateValue"
+            allowed-pattern="[0-9\.]" max="3" min="0" step="0.01"></paper-input>
+          <paper-input name="toScaleX" type="number" required label="To scale x" value="[[toScaleX]]" on-value-changed="validateAndUpdateValue"
+            allowed-pattern="[0-9\.]" max="3" min="0" step="0.01"></paper-input>
+          <paper-input name="fromScaleY" type="number" required label="From scale y" value="[[fromScaleY]]" on-value-changed="validateAndUpdateValue"
+            allowed-pattern="[0-9\.]" max="3" min="0" step="0.01"></paper-input>
+          <paper-input name="toScaleY" type="number" required label="To scale x" value="[[toScaleY]]" on-value-changed="validateAndUpdateValue"
+            allowed-pattern="[0-9\.]" max="3" min="0" step="0.01"></paper-input>
+        </div>
       </p>
 
-      <animation-keyframes animation-name="[[animationName]]" duration="[[duration]]" preset="[[preset]]" on-keyframes-changed="updateMarkdown"></animation-keyframes>
+      <animation-keyframes animation-name="[[animationName]]" duration="[[duration]]" preset="[[preset]]" frame-time="[[computeFrameTime(fps)]]"
+        from-scale-x="[[fromScaleX]]" to-scale-x="[[toScaleX]]" from-scale-y="[[fromScaleY]]" to-scale-y="[[toScaleY]]" on-keyframes-changed="updateMarkdown"></animation-keyframes>
       <h3>&lt;animation-keyframes&gt; generates this stylesheet for you.</h3>
 
       <i>Consider copying it and saving this as a static resource.</i>
@@ -97,7 +115,7 @@
       <div id="wrapper" class$="[[animationName]]" on-animationend="stop">
         <div id="content" contenteditable class$="[[computeInversedName(animationName)]]">
           <h3>Performant [[preset]] animation!</h3>
-          <p>animation-keyframes generated the keyframes for this animation.</p>
+          <p>This content is editable! Try modifying it while the animation is playing!</p>
           <ul>
             <li>item 1</li>
             <li>item 2</li>
@@ -110,25 +128,29 @@
   <script>
     const domBind = document.querySelector('dom-bind');
 
+    domBind.showCustom = preset => preset === 'custom';
+    domBind.computeFrameTime = fps => 1000 / fps;
+    domBind.computeInversedName = animationName => animationName + 'Inverse';
+    domBind.play = () => requestAnimationFrame(() => wrapper.setAttribute('play', ''));
+    domBind.stop = () => wrapper.removeAttribute('play');
+
     domBind.updateMarkdown = (event) => {
       const keyframes = event.target.keyframes || '';
       snippet._markdown = keyframes ? '```css' + keyframes + '```' : '';
-      count.textContent = `${keyframes.length} chars, ${keyframes.split(/\n/).length - 1} lines.`;
+      count.textContent =
+        `${event.target.framesCount} keyframes, ${keyframes.length} chars, ${keyframes.split(/\n/).length - 1} lines.`;
     };
 
     domBind.validateAndUpdateValue = (event) => {
       const input = event.target;
       if (input.validate())
-        domBind[input.name] = input.value;
+        domBind[input.name] = input.type === 'number' ? Number(input.value) : input.value;
     };
-
-    domBind.computeInversedName = (animationName) => animationName + 'Inverse';
-    domBind.play = () => requestAnimationFrame(() => wrapper.setAttribute('play', ''));
-    domBind.stop = () => wrapper.removeAttribute('play');
 
     addEventListener('WebComponentsReady', () => domBind.setProperties({
       animationName: 'myAnimation',
-      duration: 700
+      duration: 200,
+      fps: 60
     }));
   </script>
 </body>
