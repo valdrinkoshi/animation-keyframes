@@ -27,6 +27,7 @@
         }
         --demo-snippet-code: {
           max-height: 300px;
+          padding: 0;
         }
       }
 
@@ -136,7 +137,7 @@
 
     domBind.updateMarkdown = (event) => {
       const keyframes = event.target.keyframes || '';
-      snippet._markdown = keyframes ? '```css' + keyframes + '```' : '';
+      snippet._markdown = keyframes ? '```css\n' + keyframes + '```' : '';
       count.textContent =
         `${event.target.framesCount} keyframes, ${keyframes.length} chars, ${keyframes.split(/\n/).length - 1} lines.`;
     };
