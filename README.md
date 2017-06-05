@@ -47,17 +47,23 @@ Use this element to generate the stylesheet and save it as a static resource.
 </div>
 ```
 
-## Install the Polymer-CLI
+## Live demo
+
+https://valdrinkoshi.github.io/animation-keyframes/
+
+## Contributing
+
+### Install the Polymer-CLI
 
 First, make sure you have the [Polymer CLI](https://www.npmjs.com/package/polymer-cli) installed. Then run `polymer serve` to serve your element locally.
 
-## Viewing Your Element
+### Viewing Your Element
 
 ```
 $ polymer serve
 ```
 
-## Running Tests
+### Running Tests
 
 ```
 $ polymer test
