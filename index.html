@@ -154,14 +154,21 @@
     </template>
   </dom-bind>
   <script>
+    const domBind = document.querySelector('dom-bind');
+    const onNextRAF = callback => {
+      callback.__raf && cancelAnimationFrame(callback.__raf);
+      callback.__raf = requestAnimationFrame(() => {
+        callback.__raf = null;
+        callback();
+      })
+    };
     addEventListener('WebComponentsReady', () => {
-      const domBind = document.querySelector('dom-bind');
       const keyframes = document.querySelector('animation-keyframes');
       const playButton = document.querySelector('#play');
 
       domBind.computeInversedName = animationName => animationName + 'Inverse';
       domBind.computeEaseCallback = type => domBind.easeCallbacks[type];
-      domBind.play = () => requestAnimationFrame(() => playButton.disabled = true);
+      domBind.play = () => onNextRAF(() => playButton.disabled = true);
       domBind.stop = () => setTimeout(() => playButton.disabled = false, 200);
 
       domBind.updatePresetInfo = (event) => {
@@ -184,7 +191,7 @@
       domBind.validateAndUpdateValue = (event) => {
         const input = event.target;
         if (input.validate())
-          domBind[input.name] = input.type === 'number' ? Number(input.value) : input.value;
+          onNextRAF(() => domBind[input.name] = (input.type === 'number' ? Number(input.value) : input.value));
       };
 
       domBind.setProperties({
