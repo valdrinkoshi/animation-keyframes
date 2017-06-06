@@ -110,7 +110,7 @@
           allowed-pattern="[0-9\.]" max="3" min="0" step="0.01"></paper-input>
       </div>
 
-      <animation-keyframes animation-name="[[animationName]]" duration="[[duration]]" preset="[[preset]]" frame-time="[[computeFrameTime(fps)]]"
+      <animation-keyframes animation-name="[[animationName]]" duration="[[duration]]" preset="[[preset]]" fps="[[fps]]"
         from-scale-x="[[fromScaleX]]" to-scale-x="[[toScaleX]]" from-scale-y="[[fromScaleY]]" to-scale-y="[[toScaleY]]" on-keyframes-changed="updateMarkdown"></animation-keyframes>
 
       <paper-button class="play" raised on-tap="play">Play animation</paper-button>
@@ -147,7 +147,6 @@
     const domBind = document.querySelector('dom-bind');
 
     domBind.showCustom = preset => preset === 'custom';
-    domBind.computeFrameTime = fps => 1000 / fps;
     domBind.computeInversedName = animationName => animationName + 'Inverse';
     domBind.play = () => requestAnimationFrame(() => wrapper.setAttribute('play', ''));
     domBind.stop = () => wrapper.removeAttribute('play');

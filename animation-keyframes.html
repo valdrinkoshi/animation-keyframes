@@ -28,14 +28,13 @@
         duration: {
           type: Number
         },
-        frameTime: {
+        fps: {
           type: Number,
-          value: () => (1000 / 60)
+          value: () => 60
         },
         framesCount: {
           type: Number,
-          notify: true,
-          computed: '_computeFramesCount(duration, frameTime)'
+          computed: '_computeFramesCount(duration, fps)'
         },
         keyframes: {
           type: String,
@@ -55,8 +54,8 @@
       }
     }
 
-    _computeFramesCount(duration, frameTime) {
-      return duration > 0 && Number.isFinite(frameTime) ? Math.round(duration / frameTime) : 0;
+    _computeFramesCount(duration, fps) {
+      return duration > 0 && fps > 0 ? Math.round(duration * fps / 1000) : 0;
     }
 
     _computeKeyframes(animationName, framesCount, fromScaleX, fromScaleY, toScaleX, toScaleY) {
