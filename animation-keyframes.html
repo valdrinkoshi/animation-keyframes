@@ -82,7 +82,7 @@
          */
         preset: {
           type: String,
-          observer: '__presetChanged'
+          observer: '_presetChanged'
         },
         /** 
          * Number of keyframes.
@@ -90,7 +90,7 @@
          */
         framesCount: {
           type: Number,
-          computed: '__computeFramesCount(duration, fps)'
+          computed: '_computeFramesCount(duration, fps)'
         },
         /** 
          * The computed style text content.
@@ -99,8 +99,8 @@
         styleTextContent: {
           type: String,
           notify: true,
-          computed: '__computeStyleTextContent(animationName, framesCount, fromScaleX, fromScaleY, toScaleX, toScaleY)',
-          observer: '__styleTextContentChanged'
+          computed: '_computeStyleTextContent(animationName, framesCount, fromScaleX, fromScaleY, toScaleX, toScaleY)',
+          observer: '_styleTextContentChanged'
         }
       }
     }
@@ -120,7 +120,7 @@
      * @return {!Number}
      * @private
      */
-    __computeFramesCount(duration, fps) {
+    _computeFramesCount(duration, fps) {
       return duration > 0 && fps > 0 ? Math.round(duration * fps / 1000) : 0;
     }
 
@@ -134,7 +134,7 @@
      * @return {!string}
      * @private
      */
-    __computeStyleTextContent(animationName, framesCount, fromScaleX, fromScaleY, toScaleX, toScaleY) {
+    _computeStyleTextContent(animationName, framesCount, fromScaleX, fromScaleY, toScaleX, toScaleY) {
       if (!framesCount || framesCount === 1 || !animationName)
         return '';
       // TODO check what's the max framesCount allowed for performant animations.
@@ -205,7 +205,7 @@
      * @param {string=} content
      * @private
      */
-    __styleTextContentChanged(content) {
+    _styleTextContentChanged(content) {
       if (this._styleEl)
         this._styleEl.textContent = content;
     }
@@ -215,7 +215,7 @@
      * @param {string=} preset
      * @private
      */
-    __presetChanged(preset) {
+    _presetChanged(preset) {
       if (!preset)
         return;
       const expand = preset.endsWith('expand');
