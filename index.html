@@ -6,6 +6,21 @@
   <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
   <title>animation-keyframes demo</title>
+  
+  <script charset="utf-8">
+    /**
+     * Adapter to use BezierEasing installed via bower.
+     */
+    (global => {
+      if (!global.module) {
+        global.module = {};
+        Object.defineProperty(global.module, 'exports', {
+          set: (mod) => global.BezierEasing = mod
+        });
+      }
+    })(this);
+  </script>
+  <script src="../bezier-easing/src/index.js"></script>
 
   <script src="../webcomponentsjs/webcomponents-loader.js"></script>
 
@@ -17,7 +32,6 @@
   <link rel="import" href="../paper-listbox/paper-listbox.html">
   <link rel="import" href="../paper-item/paper-item.html">
   <link rel="import" href="../animation-keyframes/animation-keyframes.html">
-  <link rel="import" href="../animation-keyframes/bezier-easing.html">
 
   <custom-style>
     <style is="custom-style" include="demo-pages-shared-styles">
@@ -69,6 +83,9 @@
         @apply --layout-justified;
         @apply --layout-wrap;
       }
+      .inputs > * {
+        min-width: 100px;
+      }
     </style>
   </custom-style>
 </head>
@@ -88,25 +105,18 @@
           allowed-pattern="[0-9]" max="10000" min="2"></paper-input>
         <paper-input name="fps" type="number" required label="FPS" value="[[fps]]" on-value-changed="validateAndUpdateValue" allowed-pattern="[0-9]"
           max="150" min="2"></paper-input>
-        <paper-dropdown-menu label="Ease function" selected-item-label="{{easeType}}" no-animations>
-          <paper-listbox slot="dropdown-content" selected="0">
-            <paper-item>default</paper-item>
-            <paper-item>linear</paper-item>
-            <paper-item>ease</paper-item>
-            <paper-item>ease-in</paper-item>
-            <paper-item>ease-out</paper-item>
-            <paper-item>ease-in-out</paper-item>
+        <paper-dropdown-menu label="Ease function" no-animations>
+          <paper-listbox slot="dropdown-content" selected="[[easeCallbackIndex]]" on-selected-changed="updateEaseCallback">
+            <template is="dom-repeat" items="[[easeCallbacks]]">
+              <paper-item>[[item.displayValue]]</paper-item>
+            </template>
           </paper-listbox>
         </paper-dropdown-menu>
-        <paper-dropdown-menu label="preset" selected-item-label="{{preset}}" on-selected-item-label-changed="updatePresetInfo" no-animations>
-          <paper-listbox slot="dropdown-content" selected="0">
-            <paper-item>vertical-expand</paper-item>
-            <paper-item>vertical-collapse</paper-item>
-            <paper-item>horizontal-expand</paper-item>
-            <paper-item>horizontal-collapse</paper-item>
-            <paper-item>expand</paper-item>
-            <paper-item>collapse</paper-item>
-            <paper-item>custom</paper-item>
+        <paper-dropdown-menu label="preset" no-animations>
+          <paper-listbox slot="dropdown-content" selected="[[presetIndex]]" on-selected-changed="updatePreset">
+            <template is="dom-repeat" items="[[presets]]">
+              <paper-item>[[item.displayValue]]</paper-item>
+            </template>
           </paper-listbox>
         </paper-dropdown-menu>
       </div>
@@ -121,8 +131,8 @@
           allowed-pattern="[0-9\.]" max="3" min="0" step="0.01"></paper-input>
       </div>
 
-      <animation-keyframes animation-name="[[animationName]]" duration="[[duration]]" preset="[[preset]]" fps="[[fps]]" from-scale-x="[[fromScaleX]]"
-        to-scale-x="[[toScaleX]]" from-scale-y="[[fromScaleY]]" to-scale-y="[[toScaleY]]" ease-callback="[[computeEaseCallback(easeType)]]"
+      <animation-keyframes id="keyframes" animation-name="[[animationName]]" duration="[[duration]]" preset="[[preset]]" fps="[[fps]]"
+        from-scale-x="[[fromScaleX]]" to-scale-x="[[toScaleX]]" from-scale-y="[[fromScaleY]]" to-scale-y="[[toScaleY]]" ease-callback="[[easeCallback]]"
         on-style-text-content-changed="updateMarkdown"></animation-keyframes>
 
       <paper-button id="play" raised on-tap="play">Play animation</paper-button>
@@ -162,50 +172,88 @@
         callback();
       })
     };
+
+    domBind.updateMarkdown = (event) => {
+      const styleTextContent = keyframes.styleTextContent || '';
+      snippet._markdown = styleTextContent ? '```css\n' + styleTextContent + '```' : '';
+      count.textContent =
+        `${keyframes.framesCount} keyframes, ${styleTextContent.split(/\n/).length - 1} lines, ${styleTextContent.length} chars.`;
+    };
+
+    domBind.updatePreset = (event) => {
+      domBind.presetIndex = event.detail.value;
+      domBind.preset = domBind.presets[domBind.presetIndex].value;
+      domBind.isCustomPreset = domBind.preset === null;
+      if (domBind.isCustomPreset) {
+        domBind.fromScaleX = keyframes.fromScaleX;
+        domBind.fromScaleY = keyframes.fromScaleY;
+        domBind.toScaleX = keyframes.toScaleX;
+        domBind.toScaleY = keyframes.toScaleY;
+      }
+    };
+    domBind.updateEaseCallback = (event) => {
+      domBind.easeCallbackIndex = event.detail.value;
+      domBind.easeCallback = domBind.easeCallbacks[domBind.easeCallbackIndex].value;
+    };
+
+    domBind.computeInversedName = animationName => animationName + 'Inverse';
+    domBind.play = () => onNextRAF(() => play.disabled = true);
+    domBind.stop = () => setTimeout(() => play.disabled = false, 200);
+    domBind.validateAndUpdateValue = (event) => {
+      const input = event.target;
+      if (input.validate())
+        onNextRAF(() => domBind[input.name] = (input.type === 'number' ? Number(input.value) : input.value));
+    };
     addEventListener('WebComponentsReady', () => {
-      const keyframes = document.querySelector('animation-keyframes');
-      const playButton = document.querySelector('#play');
-
-      domBind.computeInversedName = animationName => animationName + 'Inverse';
-      domBind.computeEaseCallback = type => domBind.easeCallbacks[type];
-      domBind.play = () => onNextRAF(() => playButton.disabled = true);
-      domBind.stop = () => setTimeout(() => playButton.disabled = false, 200);
-
-      domBind.updatePresetInfo = (event) => {
-        domBind.isCustomPreset = event.target.selectedItemLabel === 'custom';
-        if (domBind.isCustomPreset) {
-          domBind.fromScaleX = keyframes.fromScaleX;
-          domBind.fromScaleY = keyframes.fromScaleY;
-          domBind.toScaleX = keyframes.toScaleX;
-          domBind.toScaleY = keyframes.toScaleY;
-        }
-      };
-
-      domBind.updateMarkdown = (event) => {
-        const styleTextContent = event.target.styleTextContent || '';
-        snippet._markdown = styleTextContent ? '```css\n' + styleTextContent + '```' : '';
-        count.textContent =
-          `${event.target.framesCount} keyframes, ${styleTextContent.split(/\n/).length - 1} lines, ${styleTextContent.length} chars.`;
-      };
-
-      domBind.validateAndUpdateValue = (event) => {
-        const input = event.target;
-        if (input.validate())
-          onNextRAF(() => domBind[input.name] = (input.type === 'number' ? Number(input.value) : input.value));
-      };
-
       domBind.setProperties({
         animationName: 'myAnimation',
         duration: 200,
         fps: 60,
-        easeCallbacks: {
-          'default': keyframes.easeCallback,
-          'linear': null,
-          'ease': BezierEasing(.25, .1, .25, 1),
-          'ease-in': BezierEasing(.42, 0, 1, 1),
-          'ease-out': BezierEasing(0, 0, .58, 1),
-          'ease-in-out': BezierEasing(.42, 0, .58, 1)
-        }
+        presetIndex: 0,
+        preset: 'vertical-expand',
+        presets: [{
+          displayValue: 'vertical expand',
+          value: 'vertical-expand'
+        }, {
+          displayValue: 'vertical collapse',
+          value: 'vertical-collapse'
+        }, {
+          displayValue: 'horizontal expand',
+          value: 'horizontal-expand'
+        }, {
+          displayValue: 'horizontal collapse',
+          value: 'horizontal-collapse'
+        }, {
+          displayValue: 'expand',
+          value: 'expand'
+        }, {
+          displayValue: 'collapse',
+          value: 'collapse'
+        }, {
+          displayValue: 'custom',
+          value: null
+        }],
+        easeCallbackIndex: 0,
+        easeCallback: keyframes.easeCallback,
+        easeCallbacks: [{
+          displayValue: 'default',
+          value: keyframes.easeCallback
+        }, {
+          displayValue: 'linear',
+          value: null
+        }, {
+          displayValue: 'ease',
+          value: BezierEasing(.25, .1, .25, 1)
+        }, {
+          displayValue: 'ease-in',
+          value: BezierEasing(.42, 0, 1, 1)
+        }, {
+          displayValue: 'ease-out',
+          value: BezierEasing(0, 0, .58, 1)
+        }, {
+          displayValue: 'ease-in-out',
+          value: BezierEasing(.42, 0, .58, 1)
+        }]
       });
     });
   </script>
