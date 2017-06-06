@@ -99,7 +99,7 @@
         styleTextContent: {
           type: String,
           notify: true,
-          computed: '_computeStyleTextContent(animationName, framesCount, fromScaleX, fromScaleY, toScaleX, toScaleY)',
+          computed: '_computeStyleTextContent(animationName, framesCount, fromScaleX, fromScaleY, toScaleX, toScaleY, easeCallback)',
           observer: '_styleTextContentChanged'
         }
       }
@@ -131,10 +131,11 @@
      * @param {Number=} fromScaleY
      * @param {Number=} toScaleX
      * @param {Number=} toScaleY
+     * @param {Function=} easeCallback
      * @return {!string}
      * @private
      */
-    _computeStyleTextContent(animationName, framesCount, fromScaleX, fromScaleY, toScaleX, toScaleY) {
+    _computeStyleTextContent(animationName, framesCount, fromScaleX, fromScaleY, toScaleX, toScaleY, easeCallback) {
       if (!framesCount || framesCount === 1 || !animationName)
         return '';
       // TODO check what's the max framesCount allowed for performant animations.
@@ -153,7 +154,7 @@
       const inverseAnimation = [];
       for (let i = 0; i < framesCount; i++) {
         const step = i / (framesCount - 1);
-        const easedStep = this.easeCallback ? this.easeCallback(step) : step;
+        const easedStep = easeCallback ? easeCallback(step) : step;
 
         const xScale = fromScaleX + (toScaleX - fromScaleX) * easedStep;
         const yScale = fromScaleY + (toScaleY - fromScaleY) * easedStep;
