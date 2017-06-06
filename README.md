@@ -1,3 +1,6 @@
+[![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/valdrinkoshi/animation-keyframes)
+[![Build Status](https://travis-ci.org/valdrinkoshi/animation-keyframes.svg?branch=master)](https://travis-ci.org/valdrinkoshi/animation-keyframes)
+
 # \<animation-keyframes\>
 
 \<animation-keyframes\> generates keyframes for performant expand/collapse. See more details on this technique [here](https://developers.google.com/web/updates/2017/03/performant-expand-and-collapse).
@@ -12,23 +15,43 @@ Use this element to generate the stylesheet and save it as a static resource.
 ```
 <custom-element-demo>
   <template>
+    <script src="../webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="animation-keyframes.html">
     <script src="../webcomponentsjs/webcomponents-loader.js"></script>
     <link rel="import" href="animation-keyframes.html">
-    <link rel="import" href="animation-keyframes.html">
+    <style>
+      body:not(.animate) * {
+        animation-name: none !important;
+      }
+    </style>
+    <p><button id="playButton">Play animation</button></p>
     <next-code-block></next-code-block>
+    <script>
+      var playButton = document.querySelector('#playButton');
+      playButton.addEventListener('click', function() {
+        requestAnimationFrame(function() {
+          playButton.disabled = true;
+          document.body.classList.add('animate');
+        });
+      });
+      document.body.addEventListener('animationend', function() {
+        setTimeout(function() {
+          playButton.disabled = false;
+          document.body.classList.remove('animate');
+        }, 300);
+      });
+    </script>
   </template>
 </custom-element-demo>
 ```
 -->
 ```html
-<animation-keyframes animation-name="verticalExpand500ms" preset="vertical-expand" duration="500"></animation-keyframes>
+<animation-keyframes animation-name="verticalExpand500ms" preset="vertical-expand" duration="200"></animation-keyframes>
 
 <style>
   .verticalExpand500ms { outline: 1px solid lightgray; }
   .verticalExpand500msInverse { padding: 10px; }
   .verticalExpand500ms, .verticalExpand500msInverse {
-    /* start hidden */
-    transform: scaleY(0);
     transform-origin: top left;
     animation-delay: 400ms;
     animation-fill-mode: both;
