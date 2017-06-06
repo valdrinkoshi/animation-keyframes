@@ -46,19 +46,23 @@ Use this element to generate the stylesheet and save it as a static resource.
 ```
 -->
 ```html
-<animation-keyframes animation-name="verticalExpand500ms" preset="vertical-expand" duration="200"></animation-keyframes>
+<animation-keyframes
+      animation-name="myAnimation"
+      preset="vertical-expand"
+      duration="200">
+</animation-keyframes>
 
 <style>
-  .verticalExpand500ms { outline: 1px solid lightgray; }
-  .verticalExpand500msInverse { padding: 10px; }
-  .verticalExpand500ms, .verticalExpand500msInverse {
+  .myAnimation { outline: 1px solid lightgray; }
+  .myAnimationInverse { padding: 10px; }
+  .myAnimation, .myAnimationInverse {
     transform-origin: top left;
     animation-delay: 400ms;
     animation-fill-mode: both;
   }
 </style>
-<div class="verticalExpand500ms">
-  <div class="verticalExpand500msInverse">
+<div class="myAnimation">
+  <div class="myAnimationInverse">
     <h3>Performant expand animation!</h3>
     <p>animation-keyframes generated the keyframes for this animation.</p>
     <ul>
