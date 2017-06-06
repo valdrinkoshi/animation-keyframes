@@ -1,0 +1,14 @@
+<script charset="utf-8">
+  /**
+   * Adapter to use BezierEasing installed via bower.
+   */
+  (global => {
+    if (!global.module) {
+      global.module = {};
+      Object.defineProperty(global.module, 'exports', {
+        set: (mod) => global.BezierEasing = mod
+      });
+    }
+  })(this);
+</script>
+<script src="../bezier-easing/src/index.js"></script>

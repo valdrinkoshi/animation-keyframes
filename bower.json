@@ -1,7 +1,7 @@
 {
   "name": "animation-keyframes",
   "main": "animation-keyframes.html",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "license": "MIT",
   "keywords": [
     "web-components",
@@ -16,6 +16,7 @@
     "polymer": "Polymer/polymer#^2"
   },
   "devDependencies": {
+    "bezier-easing": "gre/bezier-easing#2.0.3",
     "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^2",
     "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^2",
     "paper-listbox": "PolymerElements/paper-listbox#^2",

@@ -6,60 +6,137 @@
     }
     static get properties() {
       return {
+        /** 
+         * The name to be used for the class and keyframes.
+         * The inversed animation will have "Inverse" appended to the animationName.
+         * E.g. `animationName = "myAnimation"` generates:
+         * ```css
+         * .myAnimation { ... }
+         * .myAnimationInverse { ... }
+         * @keyframes myAnimation { ... }
+         * @keyframes myAnimationInverse { ... }
+         * ```
+         * @property {string}
+         */
         animationName: {
           type: String
         },
-        preset: {
-          type: String,
-          observer: '_presetChanged'
-        },
+        /** 
+         * Starting horizontal scale.
+         * @property {Number}
+         */
         fromScaleX: {
           type: Number
         },
+        /** 
+         * Starting vertical scale.
+         * @property {Number}
+         */
         fromScaleY: {
           type: Number
         },
+        /** 
+         * Ending horizontal scale.
+         * @property {Number}
+         */
         toScaleX: {
           type: Number
         },
+        /** 
+         * Ending vertical scale.
+         * @property {Number}
+         */
         toScaleY: {
           type: Number
         },
+        /** 
+         * Animation duration, in milliseconds.
+         * @property {Number}
+         */
         duration: {
           type: Number
         },
+        /** 
+         * Frames per second.
+         * @property {Number}
+         */
         fps: {
           type: Number,
           value: () => 60
         },
+        /**
+         * The ease function. Returns the eased `step`, which is passed as input.
+         * Default is a quadratic ease, override to change.
+         * Set to null to have a linear ease.
+         * @property {Function}
+         */
+        easeCallback: {
+          type: Number,
+          value: () => step => 1 - Math.pow(1 - step, 4)
+        },
+        /** 
+         * Sets from/to scale values.
+         * Supported values: expand, collapse, vertical-expand, vertical-collapse,
+         * horizontal-expand, horizontal-collapse.
+         * @property {string}
+         */
+        preset: {
+          type: String,
+          observer: '_presetChanged'
+        },
+        /** 
+         * Number of keyframes.
+         * @property {Number}
+         */
         framesCount: {
           type: Number,
           computed: '_computeFramesCount(duration, fps)'
         },
-        keyframes: {
+        /** 
+         * The computed style text content.
+         * @property {string}
+         */
+        styleTextContent: {
           type: String,
           notify: true,
-          computed: '_computeKeyframes(animationName, framesCount, fromScaleX, fromScaleY, toScaleX, toScaleY)',
-          observer: '_keyframesChanged'
+          computed: '_computeStyleTextContent(animationName, framesCount, fromScaleX, fromScaleY, toScaleX, toScaleY, easeCallback)',
+          observer: '_styleTextContentChanged'
         }
       }
     }
 
     connectedCallback() {
       super.connectedCallback();
-      if (!this._keyframesEl) {
-        this._keyframesEl = document.createElement('style');
-        this._keyframesEl.textContent = this.keyframes;
-        this.appendChild(this._keyframesEl);
+      if (!this._styleEl) {
+        this._styleEl = document.createElement('style');
+        this._styleEl.textContent = this.styleTextContent;
+        this.appendChild(this._styleEl);
       }
     }
 
+    /**
+     * @param {Number=} duration
+     * @param {Number=} fps
+     * @return {Number}
+     * @private
+     */
     _computeFramesCount(duration, fps) {
       return duration > 0 && fps > 0 ? Math.round(duration * fps / 1000) : 0;
     }
 
-    _computeKeyframes(animationName, framesCount, fromScaleX, fromScaleY, toScaleX, toScaleY) {
-      if (framesCount <= 1 || !animationName)
+    /**
+     * @param {string=} animationName
+     * @param {Number=} framesCount
+     * @param {Number=} fromScaleX
+     * @param {Number=} fromScaleY
+     * @param {Number=} toScaleX
+     * @param {Number=} toScaleY
+     * @param {Function=} easeCallback
+     * @return {string}
+     * @private
+     */
+    _computeStyleTextContent(animationName, framesCount, fromScaleX, fromScaleY, toScaleX, toScaleY, easeCallback) {
+      if (!framesCount || framesCount === 1 || !animationName)
         return '';
       // TODO check what's the max framesCount allowed for performant animations.
 
@@ -77,7 +154,7 @@
       const inverseAnimation = [];
       for (let i = 0; i < framesCount; i++) {
         const step = i / (framesCount - 1);
-        const easedStep = this._ease(step);
+        const easedStep = easeCallback ? easeCallback(step) : step;
 
         const xScale = fromScaleX + (toScaleX - fromScaleX) * easedStep;
         const yScale = fromScaleY + (toScaleY - fromScaleY) * easedStep;
@@ -124,15 +201,21 @@
 }`;
     }
 
-    _ease(step) {
-      return 1 - Math.pow(1 - step, 4);
+    /**
+     * Updates the style element's text content.
+     * @param {string=} content
+     * @private
+     */
+    _styleTextContentChanged(content) {
+      if (this._styleEl)
+        this._styleEl.textContent = content;
     }
 
-    _keyframesChanged(keyframes) {
-      if (this._keyframesEl)
-        this._keyframesEl.textContent = keyframes;
-    }
-
+    /**
+     * Sets the from/to scale values if `preset` has a valid value.
+     * @param {string=} preset
+     * @private
+     */
     _presetChanged(preset) {
       if (!preset)
         return;

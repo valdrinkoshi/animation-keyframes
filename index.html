@@ -17,6 +17,7 @@
   <link rel="import" href="../paper-listbox/paper-listbox.html">
   <link rel="import" href="../paper-item/paper-item.html">
   <link rel="import" href="../animation-keyframes/animation-keyframes.html">
+  <link rel="import" href="../animation-keyframes/bezier-easing.html">
 
   <custom-style>
     <style is="custom-style" include="demo-pages-shared-styles">
@@ -42,8 +43,13 @@
         padding: 10px;
       }
 
-      #custom:not([visible]) {
+      .start-invisible:not([visible]) {
         display: none;
+      }
+
+      #play {
+        width: 100%;
+        margin: 10px 0;
       }
 
       #wrapper,
@@ -53,21 +59,15 @@
         animation-fill-mode: both;
       }
 
-      #wrapper:not([play]),
-      #wrapper:not([play]) #content {
+      #play:not([disabled])+#wrapper,
+      #play:not([disabled])+#wrapper #content {
         animation-name: none !important;
       }
 
       .inputs {
         @apply --layout-horizontal;
         @apply --layout-justified;
-      }
-      .inputs > * {
-        width: 24%;
-      }
-      .play {
-        width: 100%;
-        margin: 10px 0;
+        @apply --layout-wrap;
       }
     </style>
   </custom-style>
@@ -77,17 +77,28 @@
   <dom-bind>
     <template>
       <h2>&lt;animation-keyframes&gt; demo</h2>
-      <p>&lt;animation-keyframes&gt; generates keyframes for performant expand/collapse animations. See more deails on this technique
+      <p>&lt;animation-keyframes&gt; generates keyframes for performant expand/collapse animations. See more deails on this
+        technique
         <a href="https://developers.google.com/web/updates/2017/03/performant-expand-and-collapse">here</a>.</p>
 
       <div class="inputs">
-        <paper-input name="animationName" required label="animation-name" value="[[animationName]]" on-value-changed="validateAndUpdateValue"
+        <paper-input name="animationName" required label="Animation name" value="[[animationName]]" on-value-changed="validateAndUpdateValue"
           allowed-pattern="[a-zA-Z]" minlength="1"></paper-input>
-        <paper-input name="duration" type="number" required label="duration" value="[[duration]]" on-value-changed="validateAndUpdateValue"
+        <paper-input name="duration" type="number" required label="Duration (ms)" value="[[duration]]" on-value-changed="validateAndUpdateValue"
           allowed-pattern="[0-9]" max="10000" min="2"></paper-input>
-        <paper-input name="fps" type="number" required label="Frames per second" value="[[fps]]" on-value-changed="validateAndUpdateValue"
-          allowed-pattern="[0-9]" max="150" min="2"></paper-input>
-        <paper-dropdown-menu label="preset" selected-item-label="{{preset}}" no-animations>
+        <paper-input name="fps" type="number" required label="FPS" value="[[fps]]" on-value-changed="validateAndUpdateValue" allowed-pattern="[0-9]"
+          max="150" min="2"></paper-input>
+        <paper-dropdown-menu label="Ease function" selected-item-label="{{easeType}}" no-animations>
+          <paper-listbox slot="dropdown-content" selected="0">
+            <paper-item>default</paper-item>
+            <paper-item>linear</paper-item>
+            <paper-item>ease</paper-item>
+            <paper-item>ease-in</paper-item>
+            <paper-item>ease-out</paper-item>
+            <paper-item>ease-in-out</paper-item>
+          </paper-listbox>
+        </paper-dropdown-menu>
+        <paper-dropdown-menu label="preset" selected-item-label="{{preset}}" on-selected-item-label-changed="updatePresetInfo" no-animations>
           <paper-listbox slot="dropdown-content" selected="0">
             <paper-item>vertical-expand</paper-item>
             <paper-item>vertical-collapse</paper-item>
@@ -99,7 +110,7 @@
           </paper-listbox>
         </paper-dropdown-menu>
       </div>
-      <div id="custom" class="inputs" visible$="[[showCustom(preset)]]">
+      <div class="inputs start-invisible" visible$="[[isCustomPreset]]">
         <paper-input name="fromScaleX" type="number" required label="From scale x" value="[[fromScaleX]]" on-value-changed="validateAndUpdateValue"
           allowed-pattern="[0-9\.]" max="3" min="0" step="0.01"></paper-input>
         <paper-input name="toScaleX" type="number" required label="To scale x" value="[[toScaleX]]" on-value-changed="validateAndUpdateValue"
@@ -110,11 +121,11 @@
           allowed-pattern="[0-9\.]" max="3" min="0" step="0.01"></paper-input>
       </div>
 
-      <animation-keyframes animation-name="[[animationName]]" duration="[[duration]]" preset="[[preset]]" fps="[[fps]]"
-        from-scale-x="[[fromScaleX]]" to-scale-x="[[toScaleX]]" from-scale-y="[[fromScaleY]]" to-scale-y="[[toScaleY]]" on-keyframes-changed="updateMarkdown"></animation-keyframes>
+      <animation-keyframes animation-name="[[animationName]]" duration="[[duration]]" preset="[[preset]]" fps="[[fps]]" from-scale-x="[[fromScaleX]]"
+        to-scale-x="[[toScaleX]]" from-scale-y="[[fromScaleY]]" to-scale-y="[[toScaleY]]" ease-callback="[[computeEaseCallback(easeType)]]"
+        on-style-text-content-changed="updateMarkdown"></animation-keyframes>
 
-      <paper-button class="play" raised on-tap="play">Play animation</paper-button>
-
+      <paper-button id="play" raised on-tap="play">Play animation</paper-button>
       <div id="wrapper" class$="[[animationName]]" on-animationend="stop">
         <div id="content" contenteditable class$="[[computeInversedName(animationName)]]">
           <h3>Performant [[preset]] animation!</h3>
@@ -128,10 +139,9 @@
       </div>
 
       <h3>&lt;animation-keyframes&gt; generates this stylesheet for you.</h3>
-      
+
       <p>
-        Apply <b><code>[[animationName]]</code></b> class to the wrapper element,
-        and <b><code>[[animationName]]Inverse</code></b> class to the content.
+        Apply <b>[[animationName]]</b> class to the wrapper element, and <b>[[animationName]]Inverse</b> class to the content.
       </p>
 
       <i>Consider copying it and saving this as a static resource.</i>
@@ -145,30 +155,59 @@
   </dom-bind>
   <script>
     const domBind = document.querySelector('dom-bind');
-
-    domBind.showCustom = preset => preset === 'custom';
-    domBind.computeInversedName = animationName => animationName + 'Inverse';
-    domBind.play = () => requestAnimationFrame(() => wrapper.setAttribute('play', ''));
-    domBind.stop = () => wrapper.removeAttribute('play');
-
-    domBind.updateMarkdown = (event) => {
-      const keyframes = event.target.keyframes || '';
-      snippet._markdown = keyframes ? '```css\n' + keyframes + '```' : '';
-      count.textContent =
-        `${event.target.framesCount} keyframes, ${keyframes.length} chars, ${keyframes.split(/\n/).length - 1} lines.`;
+    const onNextRAF = callback => {
+      callback.__raf && cancelAnimationFrame(callback.__raf);
+      callback.__raf = requestAnimationFrame(() => {
+        callback.__raf = null;
+        callback();
+      })
     };
+    addEventListener('WebComponentsReady', () => {
+      const keyframes = document.querySelector('animation-keyframes');
+      const playButton = document.querySelector('#play');
 
-    domBind.validateAndUpdateValue = (event) => {
-      const input = event.target;
-      if (input.validate())
-        domBind[input.name] = input.type === 'number' ? Number(input.value) : input.value;
-    };
+      domBind.computeInversedName = animationName => animationName + 'Inverse';
+      domBind.computeEaseCallback = type => domBind.easeCallbacks[type];
+      domBind.play = () => onNextRAF(() => playButton.disabled = true);
+      domBind.stop = () => setTimeout(() => playButton.disabled = false, 200);
 
-    addEventListener('WebComponentsReady', () => domBind.setProperties({
-      animationName: 'myAnimation',
-      duration: 200,
-      fps: 60
-    }));
+      domBind.updatePresetInfo = (event) => {
+        domBind.isCustomPreset = event.target.selectedItemLabel === 'custom';
+        if (domBind.isCustomPreset) {
+          domBind.fromScaleX = keyframes.fromScaleX;
+          domBind.fromScaleY = keyframes.fromScaleY;
+          domBind.toScaleX = keyframes.toScaleX;
+          domBind.toScaleY = keyframes.toScaleY;
+        }
+      };
+
+      domBind.updateMarkdown = (event) => {
+        const styleTextContent = event.target.styleTextContent || '';
+        snippet._markdown = styleTextContent ? '```css\n' + styleTextContent + '```' : '';
+        count.textContent =
+          `${event.target.framesCount} keyframes, ${styleTextContent.split(/\n/).length - 1} lines, ${styleTextContent.length} chars.`;
+      };
+
+      domBind.validateAndUpdateValue = (event) => {
+        const input = event.target;
+        if (input.validate())
+          onNextRAF(() => domBind[input.name] = (input.type === 'number' ? Number(input.value) : input.value));
+      };
+
+      domBind.setProperties({
+        animationName: 'myAnimation',
+        duration: 200,
+        fps: 60,
+        easeCallbacks: {
+          'default': keyframes.easeCallback,
+          'linear': null,
+          'ease': BezierEasing(.25, .1, .25, 1),
+          'ease-in': BezierEasing(.42, 0, 1, 1),
+          'ease-out': BezierEasing(0, 0, .58, 1),
+          'ease-in-out': BezierEasing(.42, 0, .58, 1)
+        }
+      });
+    });
   </script>
 </body>
 
