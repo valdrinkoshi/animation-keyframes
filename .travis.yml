@@ -1,0 +1,16 @@
+language: node_js
+sudo: required
+install:
+- yarn
+- node_modules/.bin/polymer install
+node_js: '6'
+addons:
+  firefox: latest
+  apt:
+    sources:
+    - google-chrome
+    packages:
+    - google-chrome-stable
+script:
+- xvfb-run node_modules/.bin/polymer test
+dist: trusty
