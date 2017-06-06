@@ -64,6 +64,16 @@
           type: Number,
           value: () => 60
         },
+        /**
+         * The ease function. Returns the eased `step`, which is passed as input.
+         * Default is a quadratic ease, override to change.
+         * Set to null to have a linear ease.
+         * @property {Function}
+         */
+        easeCallback: {
+          type: Number,
+          value: () => step => 1 - Math.pow(1 - step, 4)
+        },
         /** 
          * Sets from/to scale values.
          * Supported values: expand, collapse, vertical-expand, vertical-collapse,
@@ -105,16 +115,6 @@
     }
 
     /**
-     * The ease function. Default is a quadratic ease, override to change.
-     * @param {!Number} step
-     * @return {!Number}
-     * @protected
-     */
-    _ease(step) {
-      return 1 - Math.pow(1 - step, 4);
-    }
-
-    /**
      * @param {Number=} duration
      * @param {Number=} fps
      * @return {!Number}
@@ -153,7 +153,7 @@
       const inverseAnimation = [];
       for (let i = 0; i < framesCount; i++) {
         const step = i / (framesCount - 1);
-        const easedStep = this._ease(step);
+        const easedStep = this.easeCallback ? this.easeCallback(step) : step;
 
         const xScale = fromScaleX + (toScaleX - fromScaleX) * easedStep;
         const yScale = fromScaleY + (toScaleY - fromScaleY) * easedStep;
