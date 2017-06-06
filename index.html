@@ -111,7 +111,7 @@
       </div>
 
       <animation-keyframes animation-name="[[animationName]]" duration="[[duration]]" preset="[[preset]]" fps="[[fps]]"
-        from-scale-x="[[fromScaleX]]" to-scale-x="[[toScaleX]]" from-scale-y="[[fromScaleY]]" to-scale-y="[[toScaleY]]" on-keyframes-changed="updateMarkdown"></animation-keyframes>
+        from-scale-x="[[fromScaleX]]" to-scale-x="[[toScaleX]]" from-scale-y="[[fromScaleY]]" to-scale-y="[[toScaleY]]" on-style-text-content-changed="updateMarkdown"></animation-keyframes>
 
       <paper-button class="play" raised on-tap="play">Play animation</paper-button>
 
@@ -152,10 +152,10 @@
     domBind.stop = () => wrapper.removeAttribute('play');
 
     domBind.updateMarkdown = (event) => {
-      const keyframes = event.target.keyframes || '';
-      snippet._markdown = keyframes ? '```css\n' + keyframes + '```' : '';
+      const styleTextContent = event.target.styleTextContent || '';
+      snippet._markdown = styleTextContent ? '```css\n' + styleTextContent + '```' : '';
       count.textContent =
-        `${event.target.framesCount} keyframes, ${keyframes.length} chars, ${keyframes.split(/\n/).length - 1} lines.`;
+        `${event.target.framesCount} keyframes, ${styleTextContent.split(/\n/).length - 1} lines, ${styleTextContent.length} chars.`;
     };
 
     domBind.validateAndUpdateValue = (event) => {
