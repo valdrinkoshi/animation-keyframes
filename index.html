@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
   <title>animation-keyframes demo</title>
-  
+
   <script charset="utf-8">
     /**
      * Adapter to use BezierEasing installed via bower.
@@ -83,7 +83,8 @@
         @apply --layout-justified;
         @apply --layout-wrap;
       }
-      .inputs > * {
+
+      .inputs>* {
         min-width: 100px;
       }
     </style>
@@ -94,9 +95,11 @@
   <dom-bind>
     <template>
       <h2>&lt;animation-keyframes&gt; demo</h2>
-      <p>&lt;animation-keyframes&gt; generates keyframes for performant expand/collapse animations. See more deails on this
-        technique
-        <a href="https://developers.google.com/web/updates/2017/03/performant-expand-and-collapse">here</a>.</p>
+      <p>
+        <a href="https://github.com/valdrinkoshi/animation-keyframes/">&lt;animation-keyframes&gt;</a> generates keyframes
+        for performant expand/collapse animations. See more deails on this technique
+        <a href="https://developers.google.com/web/updates/2017/03/performant-expand-and-collapse">here</a>.
+      </p>
 
       <div class="inputs">
         <paper-input name="animationName" required label="Animation name" value="[[animationName]]" on-value-changed="validateAndUpdateValue"
