@@ -27,6 +27,7 @@
   <link rel="import" href="../iron-demo-helpers/demo-pages-shared-styles.html">
   <link rel="import" href="../iron-demo-helpers/demo-snippet.html">
   <link rel="import" href="../paper-input/paper-input.html">
+  <link rel="import" href="../paper-input/paper-textarea.html">
   <link rel="import" href="../paper-button/paper-button.html">
   <link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
   <link rel="import" href="../paper-listbox/paper-listbox.html">
@@ -66,13 +67,6 @@
         margin: 10px 0;
       }
 
-      #wrapper,
-      #content {
-        transform-origin: top left;
-        animation-delay: 400ms;
-        animation-fill-mode: both;
-      }
-
       #play:not([disabled])+#wrapper,
       #play:not([disabled])+#wrapper #content {
         animation-name: none !important;
@@ -94,7 +88,7 @@
 <body class="centered">
   <dom-bind>
     <template>
-      <h2>&lt;animation-keyframes&gt; demo</h2>
+      <h2>&lt;animation-keyframes&gt;</h2>
       <p>
         <a href="https://github.com/valdrinkoshi/animation-keyframes/">&lt;animation-keyframes&gt;</a> generates keyframes
         for performant expand/collapse animations. See more deails on this technique
@@ -102,20 +96,20 @@
       </p>
 
       <div class="inputs">
-        <paper-input name="animationName" required label="Animation name" value="[[animationName]]" on-value-changed="validateAndUpdateValue"
+        <paper-input name="animationName" required always-float-label label="Animation name" value="[[animationName]]" on-value-changed="validateAndUpdateValue"
           allowed-pattern="[a-zA-Z]" minlength="1"></paper-input>
-        <paper-input name="duration" type="number" required label="Duration (ms)" value="[[duration]]" on-value-changed="validateAndUpdateValue"
+        <paper-input name="duration" type="number" required always-float-label label="Duration (ms)" value="[[duration]]" on-value-changed="validateAndUpdateValue"
           allowed-pattern="[0-9]" max="10000" min="2"></paper-input>
-        <paper-input name="fps" type="number" required label="FPS" value="[[fps]]" on-value-changed="validateAndUpdateValue" allowed-pattern="[0-9]"
+        <paper-input name="fps" type="number" required always-float-label label="FPS" value="[[fps]]" on-value-changed="validateAndUpdateValue" allowed-pattern="[0-9]"
           max="150" min="2"></paper-input>
-        <paper-dropdown-menu label="Ease function" no-animations>
+        <paper-dropdown-menu label="Ease function" always-float-label no-animations>
           <paper-listbox slot="dropdown-content" selected="[[easeCallbackIndex]]" on-selected-changed="updateEaseCallback">
             <template is="dom-repeat" items="[[easeCallbacks]]">
               <paper-item>[[item.displayValue]]</paper-item>
             </template>
           </paper-listbox>
         </paper-dropdown-menu>
-        <paper-dropdown-menu label="preset" no-animations>
+        <paper-dropdown-menu label="preset" always-float-label no-animations>
           <paper-listbox slot="dropdown-content" selected="[[presetIndex]]" on-selected-changed="updatePreset">
             <template is="dom-repeat" items="[[presets]]">
               <paper-item>[[item.displayValue]]</paper-item>
@@ -124,15 +118,23 @@
         </paper-dropdown-menu>
       </div>
       <div class="inputs start-invisible" visible$="[[isCustomPreset]]">
-        <paper-input name="fromScaleX" type="number" required label="From scale x" value="[[fromScaleX]]" on-value-changed="validateAndUpdateValue"
+        <paper-input name="fromScaleX" type="number" required always-float-label label="From scale x" value="[[fromScaleX]]" on-value-changed="validateAndUpdateValue"
           allowed-pattern="[0-9\.]" max="3" min="0" step="0.01"></paper-input>
-        <paper-input name="toScaleX" type="number" required label="To scale x" value="[[toScaleX]]" on-value-changed="validateAndUpdateValue"
+        <paper-input name="toScaleX" type="number" required always-float-label label="To scale x" value="[[toScaleX]]" on-value-changed="validateAndUpdateValue"
           allowed-pattern="[0-9\.]" max="3" min="0" step="0.01"></paper-input>
-        <paper-input name="fromScaleY" type="number" required label="From scale y" value="[[fromScaleY]]" on-value-changed="validateAndUpdateValue"
+        <paper-input name="fromScaleY" type="number" required always-float-label label="From scale y" value="[[fromScaleY]]" on-value-changed="validateAndUpdateValue"
           allowed-pattern="[0-9\.]" max="3" min="0" step="0.01"></paper-input>
-        <paper-input name="toScaleY" type="number" required label="To scale x" value="[[toScaleY]]" on-value-changed="validateAndUpdateValue"
+        <paper-input name="toScaleY" type="number" required always-float-label label="To scale x" value="[[toScaleY]]" on-value-changed="validateAndUpdateValue"
           allowed-pattern="[0-9\.]" max="3" min="0" step="0.01"></paper-input>
       </div>
+
+      <paper-textarea name="customizedStyles" always-float-label label="Custom styles" value="{{customizedStyles}}"></paper-textarea>
+      <style>
+        .[[animationName]],
+        .[[computeInversedName(animationName)]] {
+          [[customizedStyles]]
+        }
+      </style>
 
       <animation-keyframes id="keyframes" animation-name="[[animationName]]" duration="[[duration]]" preset="[[preset]]" fps="[[fps]]"
         from-scale-x="[[fromScaleX]]" to-scale-x="[[toScaleX]]" from-scale-y="[[fromScaleY]]" to-scale-y="[[toScaleY]]" ease-callback="[[easeCallback]]"
@@ -210,6 +212,9 @@
     addEventListener('WebComponentsReady', () => {
       domBind.setProperties({
         animationName: 'myAnimation',
+        customizedStyles: `transform-origin: top left;
+animation-delay: 400ms;
+animation-fill-mode: both;`,
         duration: 200,
         fps: 60,
         presetIndex: 0,
