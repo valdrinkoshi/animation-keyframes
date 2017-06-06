@@ -39,7 +39,9 @@ git show ${branch}:bower.json > bower.json
 # install the bower deps and also this repo so we can copy the demo
 bower install
 bower install $org/$repo#$branch
-echo "<META http-equiv="refresh" content=\"0;URL=bower_components/$repo/demo/\">" >index.html
+# copy demo, replace "../ with "./bower_components in urls
+cp bower_components/$repo/index.html ./
+sed -i '' 's/"\.\.\//"\.\/bower_components\//g' index.html
 
 # send it all to github
 git add -A .
