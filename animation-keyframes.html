@@ -153,10 +153,10 @@
       const inverseAnimation = [];
       for (let i = 0; i < framesCount; i++) {
         const step = i / (framesCount - 1);
-        const _easedStep = this._ease(step);
+        const easedStep = this._ease(step);
 
-        const xScale = fromScaleX + (toScaleX - fromScaleX) * _easedStep;
-        const yScale = fromScaleY + (toScaleY - fromScaleY) * _easedStep;
+        const xScale = fromScaleX + (toScaleX - fromScaleX) * easedStep;
+        const yScale = fromScaleY + (toScaleY - fromScaleY) * easedStep;
 
         const invScaleX = xScale !== 0 ? 1 / xScale : 10e3;
         const invScaleY = yScale !== 0 ? 1 / yScale : 10e3;
