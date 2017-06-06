@@ -9,13 +9,9 @@
         /** 
          * The name to be used for the class and keyframes.
          * The inversed animation will have "Inverse" appended to the animationName.
-         * E.g. `animationName = "myAnimation"` generates:
-         * ```css
-         * .myAnimation { ... }
-         * .myAnimationInverse { ... }
-         * @keyframes myAnimation { ... }
-         * @keyframes myAnimationInverse { ... }
-         * ```
+         * E.g. `animationName = "myAnimation"` generates 
+         * `.myAnimation { ... } .myAnimationInverse { ... }` classes and
+         * `@keyframes myAnimation { ... } @keyframes myAnimationInverse { ... }` keyframes.
          * @property {string}
          */
         animationName: {
@@ -23,42 +19,42 @@
         },
         /** 
          * Starting horizontal scale.
-         * @property {Number}
+         * @property {number}
          */
         fromScaleX: {
           type: Number
         },
         /** 
          * Starting vertical scale.
-         * @property {Number}
+         * @property {number}
          */
         fromScaleY: {
           type: Number
         },
         /** 
          * Ending horizontal scale.
-         * @property {Number}
+         * @property {number}
          */
         toScaleX: {
           type: Number
         },
         /** 
          * Ending vertical scale.
-         * @property {Number}
+         * @property {number}
          */
         toScaleY: {
           type: Number
         },
         /** 
          * Animation duration, in milliseconds.
-         * @property {Number}
+         * @property {number}
          */
         duration: {
           type: Number
         },
         /** 
          * Frames per second.
-         * @property {Number}
+         * @property {number}
          */
         fps: {
           type: Number,
@@ -71,13 +67,13 @@
          * @property {Function}
          */
         easeCallback: {
-          type: Number,
+          type: Function,
           value: () => step => 1 - Math.pow(1 - step, 4)
         },
         /** 
          * Sets from/to scale values.
-         * Supported values: expand, collapse, vertical-expand, vertical-collapse,
-         * horizontal-expand, horizontal-collapse.
+         * Supported values: `expand, collapse, vertical-expand, vertical-collapse,
+         * horizontal-expand, horizontal-collapse`.
          * @property {string}
          */
         preset: {
@@ -86,7 +82,7 @@
         },
         /** 
          * Number of keyframes.
-         * @property {Number}
+         * @property {number}
          */
         framesCount: {
           type: Number,
