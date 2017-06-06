@@ -28,12 +28,14 @@
         --demo-snippet-code: {
           max-height: 300px;
           padding: 0;
+          padding-left: 5px;
         }
       }
 
       #wrapper {
         margin-top: 1rem;
-        border: 1px solid lightgray;
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+        background-color: #f5f5f5;
       }
 
       #content {
@@ -55,6 +57,18 @@
       #wrapper:not([play]) #content {
         animation-name: none !important;
       }
+
+      .inputs {
+        @apply --layout-horizontal;
+        @apply --layout-justified;
+      }
+      .inputs > * {
+        width: 24%;
+      }
+      .play {
+        width: 100%;
+        margin: 10px 0;
+      }
     </style>
   </custom-style>
 </head>
@@ -62,11 +76,11 @@
 <body class="centered">
   <dom-bind>
     <template>
-      <h2>Basic &lt;animation-keyframes&gt; demo</h2>
-      <p>&lt;animation-keyframes&gt; generates keyframes for performant expand/collapse. See more deails on this technique
+      <h2>&lt;animation-keyframes&gt; demo</h2>
+      <p>&lt;animation-keyframes&gt; generates keyframes for performant expand/collapse animations. See more deails on this technique
         <a href="https://developers.google.com/web/updates/2017/03/performant-expand-and-collapse">here</a>.</p>
 
-      <p>
+      <div class="inputs">
         <paper-input name="animationName" required label="animation-name" value="[[animationName]]" on-value-changed="validateAndUpdateValue"
           allowed-pattern="[a-zA-Z]" minlength="1"></paper-input>
         <paper-input name="duration" type="number" required label="duration" value="[[duration]]" on-value-changed="validateAndUpdateValue"
@@ -84,35 +98,23 @@
             <paper-item>custom</paper-item>
           </paper-listbox>
         </paper-dropdown-menu>
-        <div id="custom" visible$="[[showCustom(preset)]]">
-          <paper-input name="fromScaleX" type="number" required label="From scale x" value="[[fromScaleX]]" on-value-changed="validateAndUpdateValue"
-            allowed-pattern="[0-9\.]" max="3" min="0" step="0.01"></paper-input>
-          <paper-input name="toScaleX" type="number" required label="To scale x" value="[[toScaleX]]" on-value-changed="validateAndUpdateValue"
-            allowed-pattern="[0-9\.]" max="3" min="0" step="0.01"></paper-input>
-          <paper-input name="fromScaleY" type="number" required label="From scale y" value="[[fromScaleY]]" on-value-changed="validateAndUpdateValue"
-            allowed-pattern="[0-9\.]" max="3" min="0" step="0.01"></paper-input>
-          <paper-input name="toScaleY" type="number" required label="To scale x" value="[[toScaleY]]" on-value-changed="validateAndUpdateValue"
-            allowed-pattern="[0-9\.]" max="3" min="0" step="0.01"></paper-input>
-        </div>
-      </p>
+      </div>
+      <div id="custom" class="inputs" visible$="[[showCustom(preset)]]">
+        <paper-input name="fromScaleX" type="number" required label="From scale x" value="[[fromScaleX]]" on-value-changed="validateAndUpdateValue"
+          allowed-pattern="[0-9\.]" max="3" min="0" step="0.01"></paper-input>
+        <paper-input name="toScaleX" type="number" required label="To scale x" value="[[toScaleX]]" on-value-changed="validateAndUpdateValue"
+          allowed-pattern="[0-9\.]" max="3" min="0" step="0.01"></paper-input>
+        <paper-input name="fromScaleY" type="number" required label="From scale y" value="[[fromScaleY]]" on-value-changed="validateAndUpdateValue"
+          allowed-pattern="[0-9\.]" max="3" min="0" step="0.01"></paper-input>
+        <paper-input name="toScaleY" type="number" required label="To scale x" value="[[toScaleY]]" on-value-changed="validateAndUpdateValue"
+          allowed-pattern="[0-9\.]" max="3" min="0" step="0.01"></paper-input>
+      </div>
 
       <animation-keyframes animation-name="[[animationName]]" duration="[[duration]]" preset="[[preset]]" frame-time="[[computeFrameTime(fps)]]"
         from-scale-x="[[fromScaleX]]" to-scale-x="[[toScaleX]]" from-scale-y="[[fromScaleY]]" to-scale-y="[[toScaleY]]" on-keyframes-changed="updateMarkdown"></animation-keyframes>
-      <h3>&lt;animation-keyframes&gt; generates this stylesheet for you.</h3>
 
-      <i>Consider copying it and saving this as a static resource.</i>
-      <p>
-        <code>[[animationName]].css: <span id="count"></span></code>
-      </p>
+      <paper-button class="play" raised on-tap="play">Play animation</paper-button>
 
-      <demo-snippet id="snippet"></demo-snippet>
-
-      <h3>Apply the animation classes</h3>
-      <p>
-        <b><code>[[animationName]]</code></b> class to the wrapper element, and
-        <b><code>[[animationName]]Inverse</code></b> class to the content.
-      </p>
-      <paper-button raised on-tap="play">Play animation</paper-button>
       <div id="wrapper" class$="[[animationName]]" on-animationend="stop">
         <div id="content" contenteditable class$="[[computeInversedName(animationName)]]">
           <h3>Performant [[preset]] animation!</h3>
@@ -124,6 +126,21 @@
           </ul>
         </div>
       </div>
+
+      <h3>&lt;animation-keyframes&gt; generates this stylesheet for you.</h3>
+      
+      <p>
+        Apply <b><code>[[animationName]]</code></b> class to the wrapper element,
+        and <b><code>[[animationName]]Inverse</code></b> class to the content.
+      </p>
+
+      <i>Consider copying it and saving this as a static resource.</i>
+      <p>
+        <code>[[animationName]].css: <span id="count"></span></code>
+      </p>
+
+      <demo-snippet id="snippet"></demo-snippet>
+
     </template>
   </dom-bind>
   <script>
