@@ -220,6 +220,7 @@
         domBind.toScaleX = keyframes.toScaleX;
         domBind.toScaleY = keyframes.toScaleY;
       }
+      domBind.updateHash();
     };
     domBind.updateEaseCallback = (event) => {
       domBind.easeCallbackIndex = event.detail.value;
