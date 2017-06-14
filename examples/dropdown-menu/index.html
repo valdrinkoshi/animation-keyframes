@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+  <title>dropdown-menu and expand-collapse</title>
+
+  <script src="../../../webcomponentsjs/webcomponents-loader.js"></script>
+
+  <link rel="import" href="../../../iron-demo-helpers/demo-pages-shared-styles.html">
+  <link rel="import" href="dropdown-menu.html">
+
+  <custom-style>
+    <style is="custom-style" include="demo-pages-shared-styles">
+      dropdown-menu {
+        --dropdown-menu-content: {
+          background-color: white;
+          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+        }
+      }
+
+      .content {
+        padding: 10px;
+        min-width: 100px;
+        background-color: white;
+      }
+
+      dropdown-menu.top-right {
+        --dropdown-menu-content-position: {
+          left: auto;
+          right: 0;
+        }
+      }
+
+      dropdown-menu.slow {
+        --dropdown-menu-content-position: {
+          left: -50px;
+          right: -50px;
+        }
+      }
+
+      dropdown-menu.slow[opened] {
+        --dropdown-menu-content-animation-duration: 1000ms;
+      }
+    </style>
+  </custom-style>
+</head>
+
+<body class="centered">
+
+  <h2>dropdown-menu</h2>
+  <p>&lt;dropdown-menu&gt; overlaps the dropdown content on top of the trigger. It leverages <a href="../../">&lt;animation-keyframes&gt;</a>    for a performant expand animation.</p>
+  <dropdown-menu>
+    <button slot="trigger">top left</button>
+    <ul class="content">
+      <li>item 1</li>
+      <li>item 2</li>
+      <li>item 3</li>
+    </ul>
+  </dropdown-menu>
+  <dropdown-menu class="top-right">
+    <button slot="trigger">top right</button>
+    <ul class="content">
+      <li>item 4</li>
+      <li>item 5</li>
+      <li>item 6</li>
+    </ul>
+  </dropdown-menu>
+  <dropdown-menu class="slow">
+    <button slot="trigger">slow, centered</button>
+    <div class="content">
+      <h3>Performant animation!</h3>
+      <p>This content is editable! Try modifying it while the animation is playing!</p>
+      <ul>
+        <li>item 1</li>
+        <li>item 2</li>
+        <li>item 3</li>
+      </ul>
+    </div>
+  </dropdown-menu>
+</body>
+
+</html>

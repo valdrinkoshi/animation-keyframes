@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+  <title>dropdown-menu and expand-collapse</title>
+
+  <script src="../../../webcomponentsjs/webcomponents-loader.js"></script>
+
+  <link rel="import" href="../../../iron-demo-helpers/demo-pages-shared-styles.html">
+  <link rel="import" href="expand-collapse.html">
+
+  <custom-style>
+    <style is="custom-style" include="demo-pages-shared-styles">
+      expand-collapse {
+        --expand-collapse-content: {
+          background-color: white;
+          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+        }
+      }
+
+      expand-collapse.slow[opened] {
+        --expand-collapse-content-animation-duration: 1000ms;
+      }
+
+      expand-collapse [trigger] {
+        background-color: lightgreen;
+        cursor: pointer;
+      }
+
+      .content {
+        padding: 10px;
+        min-width: 150px;
+        min-height: 50px;
+        box-sizing: border-box;
+      }
+
+      .offsets {
+        margin-left: 100px;
+        margin-right: 40px;
+        margin-bottom: 20px;
+        width: 300px;
+      }
+    </style>
+  </custom-style>
+</head>
+
+<body class="centered">
+
+  <h2>expand-collapse</h2>
+  <p>&lt;expand-collapse&gt; expands the content around the trigger element. It leverages <a href="../../">&lt;animation-keyframes&gt;</a>    for a performant expand/collapse animation.</p>
+  <custom-style>
+    <style is="custom-style">
+
+    </style>
+  </custom-style>
+
+  <expand-collapse onclick="updateTrigger(event, this)">
+    <div class="content" trigger>item 1</div>
+    <div class="content">item 2</div>
+    <div class="content">item 3</div>
+    <div class="content">item 4</div>
+    <div class="content">item 5</div>
+    <div class="content">item 6</div>
+    <div class="content">item 7</div>
+  </expand-collapse>
+
+  <expand-collapse class="slow">
+    <div class="content">moar!</div>
+    <div class="content">
+      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolorem inventore, sit harum, non ea commodi. Asperiores, perspiciatis
+      cumque magnam est, unde ab cupiditate at porro ut obcaecati eligendi velit illum.
+    </div>
+    <div trigger class="content offsets">
+      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Minima, optio, ipsa veniam eveniet maiores officiis sed minus
+        excepturi consequuntur, id mollitia iste, repellendus similique? Minima laborum sed distinctio commodi delectus!</p>
+      <i>click to expand/collapse</i>
+    </div>
+    <div class="content">moar!</div>
+  </expand-collapse>
+
+  <script>
+    function updateTrigger(event, el) {
+      const trigger = event.target;
+      if (!el.opened || el.trigger === trigger) return;
+      el.addEventListener('transitioning-changed', function onClosed() {
+        if (el.transitioning) return;
+        el.removeEventListener('transitioning-changed', onClosed);
+        el.trigger = trigger;
+      });
+      el.opened = false;
+    }
+  </script>
+</body>
+
+</html>

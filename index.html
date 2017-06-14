@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-  <title>animation-keyframes demo</title>
+  <title>animation-keyframes</title>
 
   <script charset="utf-8">
     /**
@@ -88,13 +88,20 @@
 <body class="centered">
   <dom-bind>
     <template>
-      <h2>&lt;animation-keyframes&gt;</h2>
+      <h1>animation-keyframes</h1>
       <p>
         <a href="https://github.com/valdrinkoshi/animation-keyframes/">&lt;animation-keyframes&gt;</a> generates keyframes
         for performant expand/collapse animations. See more deails on this technique
         <a href="https://developers.google.com/web/updates/2017/03/performant-expand-and-collapse">here</a>.
       </p>
 
+      <h2>Usage examples</h2>
+      <ul>
+        <li><a href="examples/dropdown-menu/">&lt;dropdown-menu&gt;</a> to overlap content on top of the trigger</li>
+        <li><a href="examples/expand-collapse/">&lt;expand-collapse&gt;</a> to reveal content around the trigger</li>
+      </ul>
+
+      <h2>Animation keyframes generator</h2>
       <div class="inputs">
         <paper-input name="animationName" required always-float-label label="Animation name" value="[[animationName]]" on-value-changed="validateAndUpdateValue"
           allowed-pattern="[a-zA-Z]" minlength="1"></paper-input>
@@ -153,7 +160,7 @@
         </div>
       </div>
 
-      <h3>&lt;animation-keyframes&gt; generates this stylesheet for you.</h3>
+      <h3>Generated styles</h3>
 
       <p>
         Apply <b>[[animationName]]</b> class to the wrapper element, and <b>[[animationName]]Inverse</b> class to the content.
@@ -251,7 +258,7 @@ animation-delay: 400ms;
 animation-fill-mode: both;`,
       };
       // Read values from url.
-      location.hash.replace(/^#/g,'').split('&').forEach(param => {
+      location.hash.replace(/^#/g, '').split('&').forEach(param => {
         const params = param.split('=');
         if (params.length === 2) {
           const property = decodeURI(params[0]);

@@ -1,0 +1,126 @@
+<link rel="import" href="../../../polymer/polymer-element.html">
+
+<dom-module id="dropdown-menu">
+  <template>
+    <link rel="stylesheet" href="vertical-expand-keyframes.css">
+    <style>
+       :host {
+        display: inline-block;
+        position: relative;
+      }
+
+      #contentWrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        will-change: opacity, transform;
+        @apply --dropdown-menu-content;
+        @apply --dropdown-menu-content-position;
+      }
+
+      #contentWrapper,
+      #content {
+        animation-duration: var(--dropdown-menu-content-animation-duration, 200ms);
+        transform-origin: var(--dropdown-menu-content-transform-origin, top left);
+      }
+
+      #contentWrapper:not(.opened) {
+        animation-name: fadeOut;
+        animation-timing-function: ease-in-out;
+      }
+
+      #contentWrapper:not(.opened) #content {
+        animation-name: none;
+      }
+
+      #contentWrapper:not(.opened):not(.transitioning) {
+        transform: scaleY(0);
+        animation-name: none;
+      }
+
+      @keyframes fadeOut {
+        to {
+          opacity: 0;
+        }
+      }
+    </style>
+
+    <div id="triggerWrapper" on-click="_toggle">
+      <slot name="trigger"></slot>
+    </div>
+    <div id="contentWrapper" class="verticalExpand" on-animationend="_onAnimationend">
+      <div id="content" class="verticalExpandInverse">
+        <slot></slot>
+      </div>
+    </div>
+  </template>
+  <script>
+    class DropdownMenu extends Polymer.Element {
+      static get is() {
+        return 'dropdown-menu';
+      }
+      static get properties() {
+        return {
+          opened: {
+            type: Boolean,
+            notify: true,
+            reflectToAttribute: true,
+            observer: '_openedChanged'
+          },
+          transitioning: {
+            type: Boolean,
+            notify: true
+          }
+        }
+      }
+
+      ready() {
+        super.ready();
+        this._openedRAF = null;
+        // Close on click.
+        document.documentElement.addEventListener('click', (event) => this._onClick(event));
+        // Close on ESC.
+        document.documentElement.addEventListener('keydown', (event) => this._onKeydown(event));
+      }
+
+      _toggle(event) {
+        if (!this.transitioning)
+          this.opened = !this.opened;
+      }
+
+      _openedChanged() {
+        this._openedRAF && cancelAnimationFrame(this._openedRAF);
+        this._openedRAF = requestAnimationFrame(() => {
+          this._openedRAF = null;
+          this.$.contentWrapper.classList.toggle('opened', !!this.opened);
+          this.$.contentWrapper.classList.add('transitioning');
+          this.transitioning = true;
+        });
+      }
+
+      _onAnimationend(event) {
+        if (event.target === this.$.contentWrapper) {
+          // Update transform.
+          this.$.contentWrapper.style.transform = `scaleY(${getComputedStyle(this.$.contentWrapper).transform})`;
+          this.$.content.style.transform = `scaleY(${getComputedStyle(this.$.content).transform})`;
+          this.$.contentWrapper.classList.remove('transitioning');
+          this.transitioning = false;
+        }
+      }
+
+      _onClick(event) {
+        if (this.opened && !this.contains(event.target)) {
+          this.opened = false;
+        }
+      }
+
+      _onKeydown(event) {
+        if (this.opened && event.keyCode === 27) {
+          this.opened = false;
+        }
+      }
+    }
+    customElements.define(DropdownMenu.is, DropdownMenu);
+  </script>
+</dom-module>

@@ -1,0 +1,178 @@
+<link rel="import" href="../../../polymer/polymer-element.html">
+<link rel="import" href="../../animation-keyframes.html">
+
+<dom-module id="expand-collapse">
+  <template>
+    <style>
+       :host {
+        display: inline-block;
+        position: relative;
+      }
+
+       :host([opened]),
+       :host([transitioning]) {
+        z-index: 1;
+      }
+
+      #contentWrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
+        @apply --expand-collapse-content;
+      }
+
+      #contentWrapper,
+      #content {
+        overflow: hidden;
+        animation-duration: var(--expand-collapse-content-animation-duration, 200ms);
+      }
+    </style>
+    <animation-keyframes id="expand" animation-name="expand" duration="1000"></animation-keyframes>
+    <animation-keyframes id="collapse" animation-name="collapse" duration="1000"></animation-keyframes>
+
+    <div id="sizer" hidden>
+      <div id="contentWrapper" on-animationend="_onAnimationend">
+        <div id="content" on-click="_toggle">
+          <slot></slot>
+        </div>
+      </div>
+    </div>
+  </template>
+  <script>
+    class ExpandCollapse extends Polymer.Element {
+      static get is() {
+        return 'expand-collapse';
+      }
+      static get properties() {
+        return {
+          opened: {
+            type: Boolean,
+            notify: true,
+            reflectToAttribute: true,
+            observer: '_openedChanged'
+          },
+          trigger: {
+            type: Element,
+            observer: '_triggerChanged'
+          },
+          transitioning: {
+            type: Boolean,
+            notify: true,
+            reflectToAttribute: true
+          }
+        }
+      }
+
+      ready() {
+        super.ready();
+        this._openedRAF = null;
+        // Close on click.
+        document.documentElement.addEventListener('click', (event) => this._onClick(event));
+        // Close on ESC.
+        document.documentElement.addEventListener('keydown', (event) => this._onKeydown(event));
+
+        if (!this.trigger) {
+          this.trigger = this.querySelector('[trigger]');
+        }
+      }
+
+      _toggle(event) {
+        if (!this.transitioning && this.trigger && this.trigger.contains(event.target)) {
+          this.opened = !this.opened;
+        }
+      }
+
+      _openedChanged() {
+        this._openedRAF && cancelAnimationFrame(this._openedRAF);
+        this._openedRAF = requestAnimationFrame(() => {
+          this._openedRAF = null;
+          const opened = !!this.opened;
+          this.$.contentWrapper.classList.toggle('expand', opened);
+          this.$.content.classList.toggle('expandInverse', opened);
+          this.$.contentWrapper.classList.toggle('collapse', !opened);
+          this.$.content.classList.toggle('collapseInverse', !opened);
+          this.transitioning = true;
+        });
+      }
+
+      _triggerChanged(trigger, oldTrigger) {
+        if (oldTrigger) {
+          oldTrigger.removeAttribute('trigger');
+        }
+        if (!trigger) {
+          return;
+        }
+        trigger.setAttribute('trigger', '');
+
+        this.$.sizer.hidden = false;
+        // Reset styles.
+        this.$.sizer.style.width = this.$.sizer.style.height =
+          this.$.contentWrapper.style.top = this.$.contentWrapper.style.left =
+          this.$.contentWrapper.style.transformOrigin = this.$.content.style.transformOrigin =
+          this.$.contentWrapper.style.transform = this.$.content.style.transform =
+          '';
+        // Learn the collapsed and expanded sizes.
+        const collapsedRect = trigger.getBoundingClientRect();
+        const expandedRect = this.$.contentWrapper.getBoundingClientRect();
+        const absTop = collapsedRect.top - expandedRect.top;
+        const absLeft = collapsedRect.left - expandedRect.left;
+        // Compute the transform-origin around the trigger.
+        const anchorX = expandedRect.width === collapsedRect.width ? 0 :
+          100 * absLeft / (expandedRect.width - collapsedRect.width);
+        const anchorY = expandedRect.height === collapsedRect.height ? 0 :
+          100 * absTop / (expandedRect.height - collapsedRect.height);
+        // Compute the scales.
+        const scaleX = collapsedRect.width / expandedRect.width;
+        const scaleY = collapsedRect.height / expandedRect.height;
+        // Set the collapsed size on the sizer.
+        this.$.sizer.style.width = collapsedRect.width + 'px';
+        this.$.sizer.style.height = collapsedRect.height + 'px';
+        // Align wrapper to show trigger when expanded.
+        this.$.contentWrapper.style.top = -absTop + 'px';
+        this.$.contentWrapper.style.left = -absLeft + 'px';
+        // Adjust anchor point and transform.
+        this.$.contentWrapper.style.transformOrigin =
+          this.$.content.style.transformOrigin =
+          `${anchorX}% ${anchorY}%`;
+        this.$.contentWrapper.style.transform = this.opened ? '' : `scale(${scaleX}, ${scaleY})`;
+        this.$.content.style.transform = this.opened ? '' : `scale(${1/scaleX}, ${1/scaleY})`;
+
+        this.$.expand.setProperties({
+          fromScaleX: scaleX,
+          fromScaleY: scaleY,
+          toScaleX: 1,
+          toScaleY: 1,
+        });
+        this.$.collapse.setProperties({
+          fromScaleX: 1,
+          fromScaleY: 1,
+          toScaleX: scaleX,
+          toScaleY: scaleY,
+        });
+      }
+
+      _onAnimationend(event) {
+        if (event.target === this.$.contentWrapper) {
+          const scaleTarget = this.opened ? this.$.expand : this.$.collapse;
+          this.$.contentWrapper.style.transform = `scale(${scaleTarget.toScaleX}, ${scaleTarget.toScaleY})`;
+          this.$.content.style.transform = `scale(${1/scaleTarget.toScaleX}, ${1/scaleTarget.toScaleY})`;
+          this.transitioning = false;
+        }
+      }
+
+      _onClick(event) {
+        if (this.opened && !this.contains(event.target)) {
+          this.opened = false;
+        }
+      }
+
+      _onKeydown(event) {
+        if (this.opened && event.keyCode === 27) {
+          this.opened = false;
+          event.stopPropagation();
+        }
+      }
+    }
+    customElements.define(ExpandCollapse.is, ExpandCollapse);
+  </script>
+</dom-module>
