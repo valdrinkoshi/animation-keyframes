@@ -304,6 +304,7 @@ animation-fill-mode: both;`,
         }]
       });
       props.preset = props.presets[props.presetIndex].value;
+      props.isCustomPreset = props.preset === null;
       props.easeCallback = props.easeCallbacks[props.easeCallbackIndex].value;
 
       domBind.setProperties(props);
