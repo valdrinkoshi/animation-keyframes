@@ -251,7 +251,7 @@ animation-delay: 400ms;
 animation-fill-mode: both;`,
       };
       // Read values from url.
-      location.hash.split('&').forEach(param => {
+      location.hash.replace(/^#/g,'').split('&').forEach(param => {
         const params = param.split('=');
         if (params.length === 2) {
           const property = decodeURI(params[0]);
