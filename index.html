@@ -100,8 +100,8 @@
           allowed-pattern="[a-zA-Z]" minlength="1"></paper-input>
         <paper-input name="duration" type="number" required always-float-label label="Duration (ms)" value="[[duration]]" on-value-changed="validateAndUpdateValue"
           allowed-pattern="[0-9]" max="10000" min="2"></paper-input>
-        <paper-input name="fps" type="number" required always-float-label label="FPS" value="[[fps]]" on-value-changed="validateAndUpdateValue" allowed-pattern="[0-9]"
-          max="150" min="2"></paper-input>
+        <paper-input name="fps" type="number" required always-float-label label="FPS" value="[[fps]]" on-value-changed="validateAndUpdateValue"
+          allowed-pattern="[0-9]" max="150" min="2"></paper-input>
         <paper-dropdown-menu label="Ease function" always-float-label no-animations>
           <paper-listbox slot="dropdown-content" selected="[[easeCallbackIndex]]" on-selected-changed="updateEaseCallback">
             <template is="dom-repeat" items="[[easeCallbacks]]">
@@ -128,7 +128,7 @@
           allowed-pattern="[0-9\.]" max="3" min="0" step="0.01"></paper-input>
       </div>
 
-      <paper-textarea name="customizedStyles" always-float-label label="Custom styles" value="{{customizedStyles}}"></paper-textarea>
+      <paper-textarea name="customizedStyles" always-float-label label="Custom styles" value="{{customizedStyles}}" on-value-changed="updateHash"></paper-textarea>
       <style>
         .[[animationName]],
         .[[computeInversedName(animationName)]] {
@@ -178,13 +178,38 @@
       })
     };
 
+    const updateHash = () => {
+      let hash = [
+        `animationName=${domBind.animationName}`,
+        `duration=${domBind.duration}`,
+        `fps=${domBind.fps}`,
+        `presetIndex=${domBind.presetIndex}`,
+        `easeCallbackIndex=${domBind.easeCallbackIndex}`,
+      ];
+      if (domBind.isCustomPreset) {
+        hash = hash.concat([
+          `fromScaleX=${domBind.fromScaleX}`,
+          `fromScaleY=${domBind.fromScaleY}`,
+          `toScaleX=${domBind.toScaleX}`,
+          `toScaleY=${domBind.toScaleY}`,
+        ]);
+      }
+      if (domBind.customizedStyles) {
+        hash.push(`customizedStyles=${domBind.customizedStyles}`);
+      }
+      location.hash = hash.join('&');
+    };
+
     domBind.updateMarkdown = (event) => {
       const styleTextContent = keyframes.styleTextContent || '';
       snippet._markdown = styleTextContent ? '```css\n' + styleTextContent + '```' : '';
       count.textContent =
         `${keyframes.framesCount} keyframes, ${styleTextContent.split(/\n/).length - 1} lines, ${styleTextContent.length} chars.`;
+      domBind.updateHash();
     };
-
+    domBind.updateHash = function() {
+      onNextRAF(updateHash);
+    };
     domBind.updatePreset = (event) => {
       domBind.presetIndex = event.detail.value;
       domBind.preset = domBind.presets[domBind.presetIndex].value;
@@ -210,15 +235,32 @@
         onNextRAF(() => domBind[input.name] = (input.type === 'number' ? Number(input.value) : input.value));
     };
     addEventListener('WebComponentsReady', () => {
-      domBind.setProperties({
+      const props = {
         animationName: 'myAnimation',
-        customizedStyles: `transform-origin: top left;
-animation-delay: 400ms;
-animation-fill-mode: both;`,
         duration: 200,
         fps: 60,
         presetIndex: 0,
-        preset: 'vertical-expand',
+        easeCallbackIndex: 0,
+        fromScaleX: 1,
+        fromScaleY: 1,
+        toScaleX: 1,
+        toScaleY: 0,
+        customizedStyles: `transform-origin: left top;
+animation-delay: 400ms;
+animation-fill-mode: both;`,
+      };
+      // Read values from url.
+      location.hash.split('&').forEach(param => {
+        const params = param.split('=');
+        if (params.length === 2) {
+          const property = decodeURI(params[0]);
+          const value = decodeURI(params[1]);
+          if (property in props && value) {
+            props[property] = typeof props[property] === 'number' ? Number(value) : value;
+          }
+        }
+      });
+      Object.assign(props, {
         presets: [{
           displayValue: 'vertical expand',
           value: 'vertical-expand'
@@ -241,8 +283,6 @@ animation-fill-mode: both;`,
           displayValue: 'custom',
           value: null
         }],
-        easeCallbackIndex: 0,
-        easeCallback: keyframes.easeCallback,
         easeCallbacks: [{
           displayValue: 'default',
           value: keyframes.easeCallback
@@ -263,6 +303,10 @@ animation-fill-mode: both;`,
           value: BezierEasing(.42, 0, .58, 1)
         }]
       });
+      props.preset = props.presets[props.presetIndex].value;
+      props.easeCallback = props.easeCallbacks[props.easeCallbackIndex].value;
+
+      domBind.setProperties(props);
     });
   </script>
 </body>
