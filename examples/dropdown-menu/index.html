@@ -5,11 +5,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-  <title>dropdown-menu and expand-collapse</title>
+  <title>dropdown-menu</title>
 
   <script src="../../../webcomponentsjs/webcomponents-loader.js"></script>
 
   <link rel="import" href="../../../iron-demo-helpers/demo-pages-shared-styles.html">
+  <link rel="import" href="../../../paper-listbox/paper-listbox.html">
+  <link rel="import" href="../../../paper-item/paper-item.html">
+  <link rel="import" href="../../../paper-button/paper-button.html">
   <link rel="import" href="dropdown-menu.html">
 
   <custom-style>
@@ -21,12 +24,6 @@
         }
       }
 
-      .content {
-        padding: 10px;
-        min-width: 100px;
-        background-color: white;
-      }
-
       dropdown-menu.top-right {
         --dropdown-menu-content-position: {
           left: auto;
@@ -36,8 +33,8 @@
 
       dropdown-menu.slow {
         --dropdown-menu-content-position: {
-          left: -50px;
-          right: -50px;
+          left: 20px;
+          right: 20px;
         }
       }
 
@@ -50,35 +47,31 @@
 
 <body class="centered">
 
-  <h2>dropdown-menu</h2>
-  <p>&lt;dropdown-menu&gt; overlaps the dropdown content on top of the trigger. It leverages <a href="../../">&lt;animation-keyframes&gt;</a>    for a performant expand animation.</p>
+  <h1>dropdown-menu</h1>
+  <p>&lt;dropdown-menu&gt; overlaps the content on top of the trigger. Animation keyframes were generated using <a href="../../">&lt;animation-keyframes&gt;</a> for a performant expand animation, and stored as a static css resource.</p>
   <dropdown-menu>
-    <button slot="trigger">top left</button>
-    <ul class="content">
-      <li>item 1</li>
-      <li>item 2</li>
-      <li>item 3</li>
-    </ul>
+    <paper-button raised slot="trigger">top left</paper-button>
+    <paper-listbox class="content">
+      <paper-item>item 1</paper-item>
+      <paper-item>item 2</paper-item>
+      <paper-item>item 3</paper-item>
+    </paper-listbox>
   </dropdown-menu>
   <dropdown-menu class="top-right">
-    <button slot="trigger">top right</button>
-    <ul class="content">
-      <li>item 4</li>
-      <li>item 5</li>
-      <li>item 6</li>
-    </ul>
+    <paper-button raised slot="trigger">top right</paper-button>
+    <paper-listbox class="content">
+      <paper-item>item 4</paper-item>
+      <paper-item>item 5</paper-item>
+      <paper-item>item 6</paper-item>
+    </paper-listbox>
   </dropdown-menu>
   <dropdown-menu class="slow">
-    <button slot="trigger">slow, centered</button>
-    <div class="content">
-      <h3>Performant animation!</h3>
-      <p>This content is editable! Try modifying it while the animation is playing!</p>
-      <ul>
-        <li>item 1</li>
-        <li>item 2</li>
-        <li>item 3</li>
-      </ul>
-    </div>
+    <paper-button raised slot="trigger">slow, centered</paper-button>
+    <paper-listbox class="content">
+      <paper-item>item 7</paper-item>
+      <paper-item>item 8</paper-item>
+      <paper-item>item 9</paper-item>
+    </paper-listbox>
   </dropdown-menu>
 </body>
 

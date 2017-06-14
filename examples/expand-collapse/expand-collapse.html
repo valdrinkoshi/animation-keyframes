@@ -30,11 +30,9 @@
     <animation-keyframes id="expand" animation-name="expand" duration="1000"></animation-keyframes>
     <animation-keyframes id="collapse" animation-name="collapse" duration="1000"></animation-keyframes>
 
-    <div id="sizer" hidden>
-      <div id="contentWrapper" on-animationend="_onAnimationend">
-        <div id="content" on-click="_toggle">
-          <slot></slot>
-        </div>
+    <div id="contentWrapper" hidden on-animationend="_onAnimationend">
+      <div id="content" on-click="_toggle">
+        <slot></slot>
       </div>
     </div>
   </template>
@@ -104,9 +102,9 @@
         }
         trigger.setAttribute('trigger', '');
 
-        this.$.sizer.hidden = false;
+        this.$.contentWrapper.hidden = false;
         // Reset styles.
-        this.$.sizer.style.width = this.$.sizer.style.height =
+        this.style.width = this.style.height =
           this.$.contentWrapper.style.top = this.$.contentWrapper.style.left =
           this.$.contentWrapper.style.transformOrigin = this.$.content.style.transformOrigin =
           this.$.contentWrapper.style.transform = this.$.content.style.transform =
@@ -124,9 +122,9 @@
         // Compute the scales.
         const scaleX = collapsedRect.width / expandedRect.width;
         const scaleY = collapsedRect.height / expandedRect.height;
-        // Set the collapsed size on the sizer.
-        this.$.sizer.style.width = collapsedRect.width + 'px';
-        this.$.sizer.style.height = collapsedRect.height + 'px';
+        // Set the collapsed size on the host.
+        this.style.width = collapsedRect.width + 'px';
+        this.style.height = collapsedRect.height + 'px';
         // Align wrapper to show trigger when expanded.
         this.$.contentWrapper.style.top = -absTop + 'px';
         this.$.contentWrapper.style.left = -absLeft + 'px';
