@@ -85,24 +85,27 @@
   </custom-style>
 </head>
 
-<body class="centered">
+<body class="centered" unresolved>
+
+  <h1>animation-keyframes</h1>
+  <p>
+    <a href="https://github.com/valdrinkoshi/animation-keyframes/">&lt;animation-keyframes&gt;</a> generates keyframes for
+    performant expand/collapse animations. The technique consists in using scale transforms when animating clips, and prevent
+    the skewing of the content by counter-scaling it.
+    <a href="https://developers.google.com/web/updates/2017/03/performant-expand-and-collapse">See more details here</a>.
+  </p>
+  <p>
+    Some examples:
+    <ul>
+      <li><a href="../animation-keyframes/examples/dropdown-menu/">&lt;dropdown-menu&gt;</a> to overlap content on top of the trigger</li>
+      <li><a href="../animation-keyframes/examples/expand-collapse/">&lt;expand-collapse&gt;</a> to reveal content around the trigger</li>
+      <li>This page to generate animation keyframes</li>
+    </ul>
+  </p>
+  
+  <h1>Animation keyframes generator</h1>
   <dom-bind>
     <template>
-      <h1>animation-keyframes</h1>
-      <p>
-        <a href="https://github.com/valdrinkoshi/animation-keyframes/">&lt;animation-keyframes&gt;</a> generates keyframes
-        for performant expand/collapse animations. The technique consists in using scale transforms when animating clips, and prevent the skewing of the content by counter-scaling it.
-        <a href="https://developers.google.com/web/updates/2017/03/performant-expand-and-collapse">See more details here</a>.
-      </p>
-
-      <h2>Usage examples</h2>
-      <ul>
-        <li><a href="../animation-keyframes/examples/dropdown-menu/">&lt;dropdown-menu&gt;</a> to overlap content on top of the trigger</li>
-        <li><a href="../animation-keyframes/examples/expand-collapse/">&lt;expand-collapse&gt;</a> to reveal content around the trigger</li>
-        <li>This page to generate animation keyframes</li>
-      </ul>
-
-      <h1>Animation keyframes generator</h1>
       <div class="inputs">
         <paper-input name="animationName" required always-float-label label="Animation name" value="[[animationName]]" on-value-changed="validateAndUpdateValue"
           allowed-pattern="[a-zA-Z]" minlength="1"></paper-input>
