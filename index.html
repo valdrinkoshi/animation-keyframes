@@ -91,8 +91,8 @@
       <h1>animation-keyframes</h1>
       <p>
         <a href="https://github.com/valdrinkoshi/animation-keyframes/">&lt;animation-keyframes&gt;</a> generates keyframes
-        for performant expand/collapse animations. See more deails on this technique
-        <a href="https://developers.google.com/web/updates/2017/03/performant-expand-and-collapse">here</a>.
+        for performant expand/collapse animations. The technique consists in using scale transforms when animating clips, and prevent the skewing of the content by counter-scaling it.
+        <a href="https://developers.google.com/web/updates/2017/03/performant-expand-and-collapse">See more details here</a>.
       </p>
 
       <h2>Usage examples</h2>
@@ -127,13 +127,13 @@
       </div>
       <div class="inputs start-invisible" visible$="[[isCustomPreset]]">
         <paper-input name="fromScaleX" type="number" required always-float-label label="From scale x" value="[[fromScaleX]]" on-value-changed="validateAndUpdateValue"
-          allowed-pattern="[0-9\.]" max="3" min="0" step="0.01"></paper-input>
+          allowed-pattern="[0-9\.]" max="10" min="0" step="0.05"></paper-input>
         <paper-input name="toScaleX" type="number" required always-float-label label="To scale x" value="[[toScaleX]]" on-value-changed="validateAndUpdateValue"
-          allowed-pattern="[0-9\.]" max="3" min="0" step="0.01"></paper-input>
+          allowed-pattern="[0-9\.]" max="10" min="0" step="0.05"></paper-input>
         <paper-input name="fromScaleY" type="number" required always-float-label label="From scale y" value="[[fromScaleY]]" on-value-changed="validateAndUpdateValue"
-          allowed-pattern="[0-9\.]" max="3" min="0" step="0.01"></paper-input>
+          allowed-pattern="[0-9\.]" max="10" min="0" step="0.05"></paper-input>
         <paper-input name="toScaleY" type="number" required always-float-label label="To scale x" value="[[toScaleY]]" on-value-changed="validateAndUpdateValue"
-          allowed-pattern="[0-9\.]" max="3" min="0" step="0.01"></paper-input>
+          allowed-pattern="[0-9\.]" max="10" min="0" step="0.05"></paper-input>
       </div>
 
       <paper-textarea name="customizedStyles" always-float-label label="Custom styles" value="{{customizedStyles}}" on-value-changed="updateHash"></paper-textarea>
