@@ -186,7 +186,11 @@
       })
     };
 
+    let canUpdateHash = false;
     const updateHash = () => {
+      if (!canUpdateHash)
+        return;
+
       let hash = [
         `animationName=${domBind.animationName}`,
         `duration=${domBind.duration}`,
@@ -317,6 +321,8 @@ animation-fill-mode: both;`,
       props.easeCallback = props.easeCallbacks[props.easeCallbackIndex].value;
 
       domBind.setProperties(props);
+      // Avoids updating hash on the first navigation.
+      requestAnimationFrame(() => canUpdateHash = true);
     });
   </script>
 </body>
