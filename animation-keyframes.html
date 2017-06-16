@@ -154,7 +154,6 @@
 
         const xScale = this._formatNumber(fromScaleX + (toScaleX - fromScaleX) * easedStep);
         const yScale = this._formatNumber(fromScaleY + (toScaleY - fromScaleY) * easedStep);
-
         const invScaleX = xScale !== 0 ? this._formatNumber(1 / xScale) : 1000;
         const invScaleY = yScale !== 0 ? this._formatNumber(1 / yScale) : 1000;
 
@@ -185,8 +184,7 @@
     transform: ${scaleInverse};
   }`);
       }
-      return `
-.${animationName} {
+      return `.${animationName} {
   overflow: hidden;
   will-change: transform;
   contain: content;

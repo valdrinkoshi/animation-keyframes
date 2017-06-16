@@ -17,7 +17,9 @@
   },
   "devDependencies": {
     "bezier-easing": "gre/bezier-easing#2.0.3",
-    "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^2",
+    "marked-element": "PolymerElements/marked-element#^2",
+    "prism-element": "PolymerElements/prism-element#^2",
+    "iron-flex-layout": "PolymerElements/iron-flex-layout#^2",
     "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^2",
     "paper-listbox": "PolymerElements/paper-listbox#^2",
     "paper-item": "PolymerElements/paper-item#^2",
