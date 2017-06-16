@@ -68,10 +68,12 @@
         document.documentElement.addEventListener('click', (event) => this._onClick(event));
         // Close on ESC.
         document.documentElement.addEventListener('keydown', (event) => this._onKeydown(event));
-
-        if (!this.trigger) {
-          this.trigger = this.querySelector('[trigger]');
-        }
+        // Wait next render to safely calculate layout info.
+        requestAnimationFrame(() => {
+          if (!this.trigger) {
+            this.trigger = this.querySelector('[trigger]');
+          }
+        });
       }
 
       _toggle(event) {
