@@ -9,11 +9,17 @@
 
   <script src="../../../webcomponentsjs/webcomponents-loader.js"></script>
 
-  <link rel="import" href="../../../iron-demo-helpers/demo-pages-shared-styles.html">
+  <link rel="import" href="../../../polymer/polymer.html">
   <link rel="import" href="expand-collapse.html">
 
   <custom-style>
-    <style is="custom-style" include="demo-pages-shared-styles">
+    <style is="custom-style">
+      body {
+        max-width: 600px;
+        margin: 0 auto;
+        font-family: 'Roboto', Helvetica, sans-serif;
+      }
+
       expand-collapse {
         display: block;
         margin: 20px auto;
@@ -54,7 +60,7 @@
   </custom-style>
 </head>
 
-<body class="centered">
+<body>
 
   <h1>expand-collapse</h1>
   <p>

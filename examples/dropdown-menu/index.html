@@ -9,14 +9,20 @@
 
   <script src="../../../webcomponentsjs/webcomponents-loader.js"></script>
 
-  <link rel="import" href="../../../iron-demo-helpers/demo-pages-shared-styles.html">
+  <link rel="import" href="../../../polymer/polymer.html">
   <link rel="import" href="../../../paper-listbox/paper-listbox.html">
   <link rel="import" href="../../../paper-item/paper-item.html">
   <link rel="import" href="../../../paper-button/paper-button.html">
   <link rel="import" href="dropdown-menu.html">
 
   <custom-style>
-    <style is="custom-style" include="demo-pages-shared-styles">
+    <style is="custom-style">
+      body {
+        max-width: 600px;
+        margin: 0 auto;
+        font-family: 'Roboto', Helvetica, sans-serif;
+      }
+
       dropdown-menu {
         --dropdown-menu-content: {
           background-color: white;
@@ -48,7 +54,7 @@
 <body class="centered">
 
   <h1>dropdown-menu</h1>
-  <p>&lt;dropdown-menu&gt; overlaps the content on top of the trigger. Animation keyframes were generated using <a href="https://valdrinkoshi.github.io/animation-keyframes/">&lt;animation-keyframes&gt;</a> for a performant expand animation, and stored as a static css resource.</p>
+  <p>&lt;dropdown-menu&gt; overlaps the content on top of the trigger. Animation keyframes were generated using <a href="https://valdrinkoshi.github.io/animation-keyframes/">&lt;animation-keyframes&gt;</a>    for a performant expand animation, and stored as a static css resource.</p>
   <dropdown-menu>
     <paper-button raised slot="trigger">top left</paper-button>
     <paper-listbox class="content">
