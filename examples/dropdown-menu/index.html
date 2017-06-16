@@ -10,9 +10,6 @@
   <script src="../../../webcomponentsjs/webcomponents-loader.js"></script>
 
   <link rel="import" href="../../../polymer/polymer.html">
-  <link rel="import" href="../../../paper-listbox/paper-listbox.html">
-  <link rel="import" href="../../../paper-item/paper-item.html">
-  <link rel="import" href="../../../paper-button/paper-button.html">
   <link rel="import" href="dropdown-menu.html">
 
   <custom-style>
@@ -24,10 +21,31 @@
       }
 
       dropdown-menu {
+        --dropdown-menu-trigger: {
+          background-color: white;
+          outline: none;
+          padding: 10px;
+          border: 2px solid lightgray;
+        };
         --dropdown-menu-content: {
           background-color: white;
           box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
         }
+      }
+
+      dropdown-menu>* {
+        padding: 10px;
+        width: 160px;
+        box-sizing: border-box;
+        line-height: 24px;
+      }
+
+      dropdown-menu [selected] {
+        background-color: lightgreen;
+      }
+
+      dropdown-menu>*:hover:not([selected]) {
+        background-color: #eee;
       }
 
       dropdown-menu.top-right {
@@ -39,8 +57,7 @@
 
       dropdown-menu.slow {
         --dropdown-menu-content-position: {
-          left: 20px;
-          right: 20px;
+          left: calc(50% - 80px);
         }
       }
 
@@ -52,32 +69,25 @@
 </head>
 
 <body class="centered">
-
   <h1>dropdown-menu</h1>
   <p>&lt;dropdown-menu&gt; overlaps the content on top of the trigger. Animation keyframes were generated using <a href="https://valdrinkoshi.github.io/animation-keyframes/">&lt;animation-keyframes&gt;</a>    for a performant expand animation, and stored as a static css resource.</p>
   <dropdown-menu>
-    <paper-button raised slot="trigger">top left</paper-button>
-    <paper-listbox class="content">
-      <paper-item>item 1</paper-item>
-      <paper-item>item 2</paper-item>
-      <paper-item>item 3</paper-item>
-    </paper-listbox>
+    <option selected>top left</option>
+    <option>item 1</option>
+    <option>item 2</option>
+    <option>item 3</option>
   </dropdown-menu>
   <dropdown-menu class="top-right">
-    <paper-button raised slot="trigger">top right</paper-button>
-    <paper-listbox class="content">
-      <paper-item>item 4</paper-item>
-      <paper-item>item 5</paper-item>
-      <paper-item>item 6</paper-item>
-    </paper-listbox>
+    <option selected>top right</option>
+    <option>item 1</option>
+    <option>item 2</option>
+    <option>item 3</option>
   </dropdown-menu>
   <dropdown-menu class="slow">
-    <paper-button raised slot="trigger">slow, centered</paper-button>
-    <paper-listbox class="content">
-      <paper-item>item 7</paper-item>
-      <paper-item>item 8</paper-item>
-      <paper-item>item 9</paper-item>
-    </paper-listbox>
+    <option selected>slow, centered</option>
+    <option>item 1</option>
+    <option>item 2</option>
+    <option>item 3</option>
   </dropdown-menu>
 </body>
 

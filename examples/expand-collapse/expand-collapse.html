@@ -49,9 +49,11 @@
             reflectToAttribute: true,
             observer: '_openedChanged'
           },
-          trigger: {
+          selected: {
             type: Element,
-            observer: '_triggerChanged'
+            notify: true,
+            readOnly: true,
+            observer: '_selectedChanged'
           },
           transitioning: {
             type: Boolean,
@@ -63,46 +65,50 @@
 
       ready() {
         super.ready();
-        this._openedRAF = null;
         // Close on click.
         document.documentElement.addEventListener('click', (event) => this._onClick(event));
         // Close on ESC.
         document.documentElement.addEventListener('keydown', (event) => this._onKeydown(event));
         // Wait next render to safely calculate layout info.
         requestAnimationFrame(() => {
-          if (!this.trigger) {
-            this.trigger = this.querySelector('[trigger]');
-          }
+          this._setSelected(this.querySelector('[selected]'));
         });
       }
 
       _toggle(event) {
-        if (!this.transitioning && this.trigger && this.trigger.contains(event.target)) {
-          this.opened = !this.opened;
+        if (this.opened) {
+          let selected = event.target;
+          while (selected.parentElement !== this) {
+            selected = selected.parentElement;
+          }
+          this.opened = false;
+          const onClosed = () => {
+            this.removeEventListener('transitioning-changed', onClosed);
+            this._setSelected(selected);
+          };
+          this.addEventListener('transitioning-changed', onClosed);
+        } else if (this.selected) {
+          this.opened = true;
         }
       }
 
       _openedChanged() {
-        this._openedRAF && cancelAnimationFrame(this._openedRAF);
-        this._openedRAF = requestAnimationFrame(() => {
-          this._openedRAF = null;
-          const opened = !!this.opened;
-          this.$.contentWrapper.classList.toggle('expand', opened);
-          this.$.content.classList.toggle('expandInverse', opened);
-          this.$.contentWrapper.classList.toggle('collapse', !opened);
-          this.$.content.classList.toggle('collapseInverse', !opened);
-          this.transitioning = true;
-        });
+        const opened = !!this.opened;
+        this.$.contentWrapper.classList.toggle('expand', opened);
+        this.$.content.classList.toggle('expandInverse', opened);
+        this.$.contentWrapper.classList.toggle('collapse', !opened);
+        this.$.content.classList.toggle('collapseInverse', !opened);
+        this.transitioning = true;
       }
 
-      _triggerChanged(trigger, oldTrigger) {
-        if (oldTrigger) {
-          oldTrigger.removeAttribute('trigger');
+      _selectedChanged(selected, oldSelected) {
+        if (oldSelected) {
+          oldSelected.removeAttribute('selected');
         }
-        if (!trigger) {
+        if (!selected) {
           return;
         }
-        trigger.setAttribute('trigger', '');
+        selected.setAttribute('selected', '');
 
         this.$.contentWrapper.hidden = false;
         // Reset styles.
@@ -112,11 +118,11 @@
           this.$.contentWrapper.style.transform = this.$.content.style.transform =
           '';
         // Learn the collapsed and expanded sizes.
-        const collapsedRect = trigger.getBoundingClientRect();
+        const collapsedRect = selected.getBoundingClientRect();
         const expandedRect = this.$.contentWrapper.getBoundingClientRect();
         const absTop = collapsedRect.top - expandedRect.top;
         const absLeft = collapsedRect.left - expandedRect.left;
-        // Compute the transform-origin around the trigger.
+        // Compute the transform-origin around the selected.
         const anchorX = expandedRect.width === collapsedRect.width ? 0 :
           100 * absLeft / (expandedRect.width - collapsedRect.width);
         const anchorY = expandedRect.height === collapsedRect.height ? 0 :
@@ -127,7 +133,7 @@
         // Set the collapsed size on the host.
         this.style.width = collapsedRect.width + 'px';
         this.style.height = collapsedRect.height + 'px';
-        // Align wrapper to show trigger when expanded.
+        // Align wrapper to show selected when expanded.
         this.$.contentWrapper.style.top = -absTop + 'px';
         this.$.contentWrapper.style.left = -absLeft + 'px';
         // Adjust anchor point and transform.
