@@ -59,20 +59,6 @@
         animation-name: none !important;
       }
 
-      .inputs {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-      }
-
-      .inputs>* {
-        width: 100%;
-      }
-
-      .inputs>*+* {
-        margin-left: 10px;
-      }
-
       expand-collapse {
         display: block;
         z-index: 2;
@@ -85,7 +71,6 @@
 
       dropdown-menu {
         z-index: 2;
-        max-width: 150px;
         --dropdown-menu-trigger: {
           background-color: white;
           line-height: 24px;
@@ -100,18 +85,18 @@
         }
       }
 
-      dropdown-menu>div {
+      .item {
         padding: 10px;
         line-height: 24px;
         background-color: white;
         cursor: pointer;
       }
 
-      dropdown-menu>div[selected] {
+      .item[selected] {
         background-color: lightgreen;
       }
 
-      dropdown-menu>div:hover:not([selected]) {
+      .item:hover:not([selected]) {
         background-color: #eee;
       }
 
@@ -120,8 +105,14 @@
         flex-direction: column;
       }
 
+      label:not(.full-width) {
+        display: inline-flex;
+        width: calc(25% - 3px);
+      }
+
       label>* {
         margin: 10px 0;
+        width: 100%;
       }
 
       input,
@@ -133,35 +124,33 @@
         resize: none;
       }
     </style>
-    <div class="inputs">
-      <label>Ease function
-        <input name="animationName" required label="Animation name" value="[[animationName]]" on-change="validateAndUpdateValue"
+    <label>Animation name
+        <input name="animationName" required value="[[animationName]]" on-change="validateAndUpdateValue"
           allowed-pattern="[a-zA-Z]" minlength="1">
       </label>
-      <label>Ease function
-        <input name="duration" type="number" required label="Duration (ms)" value="[[duration]]" on-change="validateAndUpdateValue"
+    <label>Duration (ms)
+        <input name="duration" type="number" required value="[[duration]]" on-change="validateAndUpdateValue"
           allowed-pattern="[0-9]" max="10000" min="2" />
       </label>
-      <label>FPS
+    <label>FPS
         <input name="fps" type="number" required value="[[fps]]" on-change="validateAndUpdateValue" allowed-pattern="[0-9]"
           max="150" min="2"/>
       </label>
-      <label>Ease function
+    <label>Ease function
         <dropdown-menu selected-index="{{easeCallbackIndex}}">
           <template is="dom-repeat" items="[[easeCallbacks]]">
-            <div>[[item.label]]</div>
+            <div class="item">[[item.label]]</div>
           </template>
         </dropdown-menu>
       </label>
-    </div>
     <label>Preset
       <dropdown-menu selected-index="{{presetIndex}}">
         <template is="dom-repeat" items="[[presets]]">
-          <div>[[item.label]]</div>
+          <div class="item">[[item.label]]</div>
         </template>
       </dropdown-menu>
     </label>
-    <div class="inputs start-invisible" visible$="[[isCustomPreset]]">
+    <div class="start-invisible" visible$="[[isCustomPreset]]">
       <label>From scale x
         <input name="fromScaleX" type="number" required value="[[fromScaleX]]" on-change="validateAndUpdateValue" allowed-pattern="[0-9\.]"
           max="10" min="0" step="0.05" />
@@ -179,7 +168,7 @@
           max="10" min="0" step="0.05" />
       </label>
     </div>
-    <label>
+    <label class="full-width">
       Custom styles
       <textarea rows="3" name="customizedStyles" value="[[customizedStyles]]" on-change="validateAndUpdateValue"></textarea>
     </label>

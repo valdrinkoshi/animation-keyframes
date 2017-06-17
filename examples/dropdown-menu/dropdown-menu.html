@@ -122,6 +122,7 @@
           this.selectedIndex = this._computeSelectedIndex(selected);
         };
         this.addEventListener('transitioning-changed', onClosed);
+        event.preventDefault();
       }
 
       _openedChanged() {
