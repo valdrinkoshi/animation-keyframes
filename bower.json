@@ -17,14 +17,6 @@
   },
   "devDependencies": {
     "bezier-easing": "gre/bezier-easing#2.0.3",
-    "marked-element": "PolymerElements/marked-element#^2",
-    "prism-element": "PolymerElements/prism-element#^2",
-    "iron-flex-layout": "PolymerElements/iron-flex-layout#^2",
-    "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^2",
-    "paper-listbox": "PolymerElements/paper-listbox#^2",
-    "paper-item": "PolymerElements/paper-item#^2",
-    "paper-button": "PolymerElements/paper-button#^2",
-    "paper-input": "PolymerElements/paper-input#^2",
     "web-component-tester": "^6",
     "webcomponentsjs": "webcomponents/webcomponentsjs#^1"
   }

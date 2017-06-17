@@ -2,7 +2,7 @@
 
 <dom-module id="dropdown-menu">
   <template>
-    <link rel="stylesheet" href="vertical-expand-keyframes.css">
+    <link rel="stylesheet" href$="[[importPath]]vertical-expand-keyframes.css">
     <style>
        :host {
         display: inline-block;
@@ -76,10 +76,14 @@
             reflectToAttribute: true,
             observer: '_openedChanged'
           },
+          selectedIndex: {
+            type: Number,
+            notify: true,
+          },
           selected: {
             type: Element,
             notify: true,
-            readOnly: true,
+            computed: '_computeSelected(selectedIndex)',
             observer: '_selectedChanged'
           },
           transitioning: {
@@ -91,13 +95,15 @@
 
       ready() {
         super.ready();
-        // Close on click.
-        document.documentElement.addEventListener('click', (event) => this._onClick(event));
-        // Close on ESC.
-        document.documentElement.addEventListener('keydown', (event) => this._onKeydown(event));
+        this._onClick = this._onClick.bind(this);
+        this._onKeydown = this._onKeydown.bind(this);
         // Wait next render for distribution.
         requestAnimationFrame(() => {
-          this._setSelected(this.querySelector('[selected]'));
+          if (this.selectedIndex == undefined) {
+            this.selectedIndex = this._computeSelectedIndex(this.querySelector('[selected]')) || 0;
+          } else {
+            this._selectedChanged(this._computeSelected(this.selectedIndex));
+          }
         });
       }
 
@@ -113,7 +119,7 @@
         this.opened = false;
         const onClosed = () => {
           this.removeEventListener('transitioning-changed', onClosed);
-          this._setSelected(selected);
+          this.selectedIndex = this._computeSelectedIndex(selected);
         };
         this.addEventListener('transitioning-changed', onClosed);
       }
@@ -121,17 +127,32 @@
       _openedChanged() {
         this.$.contentWrapper.classList.toggle('opened', !!this.opened);
         this.$.contentWrapper.classList.add('transitioning');
+
+        // Toggle listeners.
+        const method = this.opened ? 'addEventListener' : 'removeEventListener';
+        document.documentElement[method]('click', this._onClick);
+        document.documentElement[method]('keydown', this._onKeydown);
+
         this.transitioning = true;
       }
 
-      _selectedChanged(selected, oldSelected) {
+      _computeSelected(selectedIndex) {
+        return this.children[selectedIndex];
+      }
+
+      _computeSelectedIndex(selected) {
+        return Array.from(this.children).indexOf(selected);
+      }
+
+      _selectedChanged(selected) {
+        const oldSelected = this.querySelector('[selected]');
         if (oldSelected) {
           oldSelected.removeAttribute('selected');
         }
         if (selected) {
           selected.setAttribute('selected', '');
         }
-        this.$.trigger.textContent = selected ? selected.textContent : '';
+        this.$.trigger.textContent = selected ? selected.textContent : 'Toggle';
       }
 
       _onAnimationend(event) {
@@ -145,13 +166,13 @@
       }
 
       _onClick(event) {
-        if (this.opened && !this.contains(event.target)) {
+        if (event.composedPath().indexOf(this) === -1) {
           this.opened = false;
         }
       }
 
       _onKeydown(event) {
-        if (this.opened && event.keyCode === 27) {
+        if (event.keyCode === 27) {
           this.opened = false;
         }
       }

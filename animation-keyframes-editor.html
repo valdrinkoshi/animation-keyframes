@@ -1,32 +1,43 @@
 <link rel="import" href="../polymer/polymer-element.html">
-<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
-<link rel="import" href="../marked-element/marked-element.html">
-<link rel="import" href="../prism-element/prism-highlighter.html">
-<link rel="import" href="../prism-element/prism-theme-default.html">
-<link rel="import" href="../paper-input/paper-input.html">
-<link rel="import" href="../paper-input/paper-textarea.html">
-<link rel="import" href="../paper-button/paper-button.html">
-<link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
-<link rel="import" href="../paper-listbox/paper-listbox.html">
-<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="../polymer/lib/elements/dom-repeat.html">
+<link rel="import" href="../shadycss/apply-shim.html">
+<link rel="import" href="examples/dropdown-menu/dropdown-menu.html">
 <link rel="import" href="animation-keyframes.html">
 
 <dom-module id="animation-keyframes-editor">
   <template>
-    <style include="prism-theme-default">
+    <style>
        :host {
         display: block;
         padding-bottom: 50px;
       }
 
-      marked-element {
+      button,
+      input[type="submit"] {
+        background-color: white;
+        padding: 10px;
+        border: 2px solid lightgray;
+        cursor: pointer;
+      }
+
+      #raw {
         padding: 10px;
         box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
         background-color: #f5f5f5;
       }
 
-      marked-element pre {
-        margin: 0;
+      #animationWrapper,
+      #codeWrapper {
+        position: relative;
+        margin-top: 20px;
+      }
+
+      #animationWrapper>button,
+      #codeWrapper>form {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 1;
       }
 
       #wrapper {
@@ -42,19 +53,15 @@
         display: none;
       }
 
-      paper-button {
-        width: 100%;
-        margin: 10px 0;
-      }
-
       #play:not([disabled])+#wrapper,
       #play:not([disabled])+#wrapper #content {
         animation-name: none !important;
       }
 
       .inputs {
-        @apply --layout-horizontal;
-        @apply --layout-justified;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
       }
 
       .inputs>* {
@@ -62,77 +69,157 @@
       }
 
       .inputs>*+* {
-        margin: 0 5px;
+        margin-left: 10px;
+      }
+
+      expand-collapse {
+        display: block;
+        z-index: 2;
+        outline: 1px solid lightgray;
+        --expand-collapse-content: {
+          background-color: white;
+          outline: 1px solid lightgray;
+        }
+      }
+
+      dropdown-menu {
+        z-index: 2;
+        max-width: 150px;
+        --dropdown-menu-trigger: {
+          background-color: white;
+          outline: none;
+          line-height: 24px;
+          text-align: left;
+          outline: 1px solid lightgray;
+          font-size: 14px;
+        };
+        --dropdown-menu-content: {
+          width: 100%;
+          background-color: white;
+          outline: 1px solid lightgray;
+        }
+      }
+
+      option {
+        padding: 10px;
+        line-height: 24px;
+        background-color: white;
+        cursor: pointer;
+      }
+
+      option[selected] {
+        background-color: lightgreen;
+      }
+
+      option:hover:not([selected]) {
+        background-color: #eee;
+      }
+
+      label {
+        display: flex;
+        flex-direction: column;
+      }
+
+      label>* {
+        margin: 10px 0;
+      }
+
+      input,
+      button,
+      textarea {
+        font-size: 14px;
+        box-sizing: border-box;
+        line-height: 24px;
+        resize: none;
       }
     </style>
     <div class="inputs">
-      <paper-input name="animationName" required always-float-label label="Animation name" value="[[animationName]]" on-value-changed="validateAndUpdateValue"
-        allowed-pattern="[a-zA-Z]" minlength="1"></paper-input>
-      <paper-input name="duration" type="number" required always-float-label label="Duration (ms)" value="[[duration]]" on-value-changed="validateAndUpdateValue"
-        allowed-pattern="[0-9]" max="10000" min="2"></paper-input>
-      <paper-input name="fps" type="number" required always-float-label label="FPS" value="[[fps]]" on-value-changed="validateAndUpdateValue"
-        allowed-pattern="[0-9]" max="150" min="2"></paper-input>
-      <paper-dropdown-menu label="Ease function" always-float-label no-animations>
-        <paper-listbox slot="dropdown-content" selected="{{easeCallbackIndex}}">
+      <label>Ease function
+        <input name="animationName" required label="Animation name" value="[[animationName]]" on-change="validateAndUpdateValue"
+          allowed-pattern="[a-zA-Z]" minlength="1">
+      </label>
+      <label>Ease function
+        <input name="duration" type="number" required label="Duration (ms)" value="[[duration]]" on-change="validateAndUpdateValue"
+          allowed-pattern="[0-9]" max="10000" min="2" />
+      </label>
+      <label>FPS
+        <input name="fps" type="number" required value="[[fps]]" on-change="validateAndUpdateValue" allowed-pattern="[0-9]"
+          max="150" min="2"/>
+      </label>
+      <label>Ease function
+        <dropdown-menu selected-index="{{easeCallbackIndex}}">
           <template is="dom-repeat" items="[[easeCallbacks]]">
-            <paper-item>[[item.label]]</paper-item>
+            <option>[[item.label]]</option>
           </template>
-        </paper-listbox>
-      </paper-dropdown-menu>
+        </dropdown-menu>
+      </label>
     </div>
-    <paper-dropdown-menu label="preset" always-float-label no-animations>
-      <paper-listbox slot="dropdown-content" selected="{{presetIndex}}">
+    <label>Preset
+      <dropdown-menu selected-index="{{presetIndex}}">
         <template is="dom-repeat" items="[[presets]]">
-          <paper-item>[[item.label]]</paper-item>
+          <option>[[item.label]]</option>
         </template>
-      </paper-listbox>
-    </paper-dropdown-menu>
+      </dropdown-menu>
+    </label>
     <div class="inputs start-invisible" visible$="[[isCustomPreset]]">
-      <paper-input name="fromScaleX" type="number" required always-float-label label="From scale x" value="[[fromScaleX]]" on-value-changed="validateAndUpdateValue"
-        allowed-pattern="[0-9\.]" max="10" min="0" step="0.05"></paper-input>
-      <paper-input name="toScaleX" type="number" required always-float-label label="To scale x" value="[[toScaleX]]" on-value-changed="validateAndUpdateValue"
-        allowed-pattern="[0-9\.]" max="10" min="0" step="0.05"></paper-input>
-      <paper-input name="fromScaleY" type="number" required always-float-label label="From scale y" value="[[fromScaleY]]" on-value-changed="validateAndUpdateValue"
-        allowed-pattern="[0-9\.]" max="10" min="0" step="0.05"></paper-input>
-      <paper-input name="toScaleY" type="number" required always-float-label label="To scale x" value="[[toScaleY]]" on-value-changed="validateAndUpdateValue"
-        allowed-pattern="[0-9\.]" max="10" min="0" step="0.05"></paper-input>
+      <label>From scale x
+        <input name="fromScaleX" type="number" required value="[[fromScaleX]]" on-change="validateAndUpdateValue" allowed-pattern="[0-9\.]"
+          max="10" min="0" step="0.05" />
+      </label>
+      <label>To scale x
+        <input name="toScaleX" type="number" required value="[[toScaleX]]" on-change="validateAndUpdateValue" allowed-pattern="[0-9\.]"
+          max="10" min="0" step="0.05" />
+      </label>
+      <label>From scale y
+        <input name="fromScaleY" type="number" required value="[[fromScaleY]]" on-change="validateAndUpdateValue" allowed-pattern="[0-9\.]"
+          max="10" min="0" step="0.05" />
+      </label>
+      <label>To scale x
+        <input name="toScaleY" type="number" required value="[[toScaleY]]" on-change="validateAndUpdateValue" allowed-pattern="[0-9\.]"
+          max="10" min="0" step="0.05" />
+      </label>
     </div>
-
-    <paper-textarea name="customizedStyles" always-float-label label="Custom styles" value="{{customizedStyles}}"></paper-textarea>
+    <label>
+      Custom styles
+      <textarea rows="3" name="customizedStyles" value="[[customizedStyles]]" on-change="validateAndUpdateValue"></textarea>
+    </label>
 
     <animation-keyframes id="keyframes" animation-name="[[animationName]]" duration="[[duration]]" preset="[[preset]]" fps="[[fps]]"
       from-scale-x="[[fromScaleX]]" to-scale-x="[[toScaleX]]" from-scale-y="[[fromScaleY]]" to-scale-y="[[toScaleY]]" ease-callback="[[easeCallback]]"
       style-text-content="{{styleTextContent}}"></animation-keyframes>
 
-    <paper-button id="play" raised on-tap="play">Play animation</paper-button>
-    <div id="wrapper" class$="[[animationName]]" on-animationend="stop">
-      <div id="content" contenteditable class$="[[animationNameInverse]]">
-        <h3>Performant [[preset]] animation!</h3>
-        <p>This content is editable! Try modifying it while the animation is playing!</p>
-        <ul>
-          <li>item 1</li>
-          <li>item 2</li>
-          <li>item 3</li>
-        </ul>
+    <div id="animationWrapper">
+      <button id="play" on-click="play">Play animation</button>
+      <div id="wrapper" class$="[[animationName]]" on-animationend="stop">
+        <div id="content" contenteditable class$="[[animationNameInverse]]">
+          <h3>Performant [[preset]] animation!</h3>
+          <p>This content is editable! Try modifying it while the animation is playing!</p>
+          <ul>
+            <li>item 1</li>
+            <li>item 2</li>
+            <li>item 3</li>
+          </ul>
+        </div>
       </div>
     </div>
-
-    <h2>Generated stylesheet</h2>
 
     <p>
       Apply <b>[[animationName]]</b> class to the wrapper element, and <b>[[animationNameInverse]]</b> class to the content.
     </p>
 
-    <i>Consider copying it and saving this as a static resource.</i>
     <p>
-      <code>[[animationName]].css: <span id="counter"></span></code>
+      <a id="download" target="_blank">[[animationName]].css</a>: <code id="counter"></code>
     </p>
 
-    <paper-button id="copyButton" raised on-tap="copyToClipboard">copy</paper-button>
-    <prism-highlighter></prism-highlighter>
-    <marked-element id="marked">
-      <div id="code" slot="markdown-html"></div>
-    </marked-element>
+    <div id="codeWrapper">
+      <form action="https://jsfiddle.net/api/post/library/pure/" method="post" target="_blank">
+        <input type="hidden" name="css" value="[[markdown]]">
+        <input type="hidden" name="html" value="[[jsFiddleHTML]]">
+        <input type="hidden" name="js" value="[[jsFiddleJS]]">
+        <input type="submit" value="Export to JSFiddle">
+      </form>
+      <pre id="raw"></pre>
+    </div>
   </template>
   <script>
     (() => {
@@ -285,6 +372,35 @@ animation-delay: 200ms;`,
                 label: 'ease-in-out',
                 value: BezierEasing(.42, 0, .58, 1)
               }]
+            },
+            jsFiddleHTML: {
+              type: String,
+              readOnly: true,
+            },
+            jsFiddleJS: {
+              type: String,
+              readOnly: true,
+              value: `var play, wrapper, content;
+requestAnimationFrame(init);
+
+function init() {
+  play = document.getElementById('play');
+  wrapper = document.getElementById('wrapper');
+  content = document.getElementById('content');
+  play.addEventListener('click', playAnimation);
+  wrapper.addEventListener('animationend', animationDone);
+  animationDone();
+}
+
+function playAnimation() {
+	play.disabled = true;
+  wrapper.style.animationName = content.style.animationName = '';
+}
+
+function animationDone() {
+  play.disabled = false;
+  wrapper.style.animationName = content.style.animationName = 'none';
+}`
             }
           }
         }
@@ -323,7 +439,10 @@ animation-delay: 200ms;`,
               this.shadowRoot.appendChild(this.$.customStyle);
             }
             this.$.customStyle.textContent = this.customStyleTextContent || '';
-            this.$.marked.markdown = this.markdown ? '```css\n' + this.markdown + '```' : '';
+            this.$.raw.innerHTML = this.markdown;
+            this.$.download.download = this.animationName + '.css';
+            this.$.download.href = 'data:text/css,' + this.markdown;
+            this._setJsFiddleHTML(this.$.animationWrapper.innerHTML);
             this.updateHash();
             this._canUpdateHash = true;
           });
@@ -382,7 +501,7 @@ animation-delay: 200ms;`,
 
         validateAndUpdateValue(event) {
           const input = event.target;
-          if (input.validate())
+          if (input.checkValidity())
             requestAnimationFrame(() => this[input.name] = (input.type === 'number' ? Number(input.value) : input
               .value));
         }
