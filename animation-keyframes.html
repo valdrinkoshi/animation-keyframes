@@ -103,6 +103,7 @@
 
     connectedCallback() {
       super.connectedCallback();
+      this.style.display = 'none';
       if (!this._styleEl) {
         this._styleEl = document.createElement('style');
         this._styleEl.textContent = this.styleTextContent;

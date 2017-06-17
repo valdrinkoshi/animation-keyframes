@@ -79,11 +79,12 @@
           selectedIndex: {
             type: Number,
             notify: true,
+            observer: '_selectedIndexChanged'
           },
           selected: {
             type: Element,
             notify: true,
-            computed: '_computeSelected(selectedIndex)',
+            readOnly: true,
             observer: '_selectedChanged'
           },
           transitioning: {
@@ -100,9 +101,10 @@
         // Wait next render for distribution.
         requestAnimationFrame(() => {
           if (this.selectedIndex == undefined) {
-            this.selectedIndex = this._computeSelectedIndex(this.querySelector('[selected]')) || 0;
+            const selected = this.querySelector('[selected]');
+            this.selectedIndex = selected ? this._computeSelectedIndex(selected) : 0;
           } else {
-            this._selectedChanged(this._computeSelected(this.selectedIndex));
+            this._selectedChanged(this.selectedIndex);
           }
         });
       }
@@ -137,12 +139,12 @@
         this.transitioning = true;
       }
 
-      _computeSelected(selectedIndex) {
-        return this.children[selectedIndex];
-      }
-
       _computeSelectedIndex(selected) {
         return Array.from(this.children).indexOf(selected);
+      }
+
+      _selectedIndexChanged(selectedIndex){
+        this._setSelected(this.children[selectedIndex]);
       }
 
       _selectedChanged(selected) {

@@ -9,7 +9,7 @@
 
   <script src="../../../webcomponentsjs/webcomponents-loader.js"></script>
 
-  
+
   <link rel="import" href="../../../shadycss/apply-shim.html">
   <link rel="import" href="../../../polymer/lib/elements/custom-style.html">
   <link rel="import" href="dropdown-menu.html">
@@ -35,19 +35,19 @@
         }
       }
 
-      dropdown-menu>* {
+      .item {
         padding: 10px;
         width: 160px;
         box-sizing: border-box;
         line-height: 24px;
       }
 
-      dropdown-menu [selected] {
-        background-color: lightgreen;
+      .item:hover {
+        background-color: #eee;
       }
 
-      dropdown-menu>*:hover:not([selected]) {
-        background-color: #eee;
+      .item[selected] {
+        background-color: lightgreen;
       }
 
       dropdown-menu.top-right {
@@ -74,22 +74,22 @@
   <h1>dropdown-menu</h1>
   <p>&lt;dropdown-menu&gt; overlaps the content on top of the trigger. Animation keyframes were generated using <a href="https://valdrinkoshi.github.io/animation-keyframes/">&lt;animation-keyframes&gt;</a>    for a performant expand animation, and stored as a static css resource.</p>
   <dropdown-menu>
-    <div selected>top left</div>
-    <div>item 1</div>
-    <div>item 2</div>
-    <div>item 3</div>
+    <div class="item">top left</div>
+    <div class="item">item 1</div>
+    <div class="item">item 2</div>
+    <div class="item">item 3</div>
   </dropdown-menu>
   <dropdown-menu class="top-right">
-    <div selected>top right</div>
-    <div>item 1</div>
-    <div>item 2</div>
-    <div>item 3</div>
+    <div class="item">item 1</div>
+    <div class="item">item 2</div>
+    <div class="item" selected>top right</div>
+    <div class="item">item 3</div>
   </dropdown-menu>
   <dropdown-menu class="slow">
-    <div selected>slow, centered</div>
-    <div>item 1</div>
-    <div>item 2</div>
-    <div>item 3</div>
+    <div class="item" selected>slow, centered</div>
+    <div class="item">item 1</div>
+    <div class="item">item 2</div>
+    <div class="item">item 3</div>
   </dropdown-menu>
 </body>
 

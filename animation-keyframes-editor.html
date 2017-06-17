@@ -1,7 +1,7 @@
 <link rel="import" href="../polymer/polymer-element.html">
 <link rel="import" href="../polymer/lib/elements/dom-repeat.html">
 <link rel="import" href="../shadycss/apply-shim.html">
-<link rel="import" href="examples/dropdown-menu/dropdown-menu.html">
+<link rel="import" href="examples/expand-collapse/expand-collapse.html">
 <link rel="import" href="animation-keyframes.html">
 
 <dom-module id="animation-keyframes-editor">
@@ -64,21 +64,6 @@
         z-index: 2;
         outline: 1px solid lightgray;
         --expand-collapse-content: {
-          background-color: white;
-          outline: 1px solid lightgray;
-        }
-      }
-
-      dropdown-menu {
-        z-index: 2;
-        --dropdown-menu-trigger: {
-          background-color: white;
-          line-height: 24px;
-          text-align: left;
-          outline: 1px solid lightgray;
-          font-size: 14px;
-        };
-        --dropdown-menu-content: {
           width: 100%;
           background-color: white;
           outline: 1px solid lightgray;
@@ -86,13 +71,15 @@
       }
 
       .item {
-        padding: 10px;
         line-height: 24px;
+        padding: 10px;
+        font-size: 14px;
         background-color: white;
         cursor: pointer;
       }
 
-      .item[selected] {
+      expand-collapse[opened] .item[selected],
+      expand-collapse[transitioning] .item[selected] {
         background-color: lightgreen;
       }
 
@@ -118,6 +105,9 @@
       input,
       button,
       textarea {
+        padding: 10px;
+        outline: none;
+        border: 1px solid lightgray;
         font-size: 14px;
         box-sizing: border-box;
         line-height: 24px;
@@ -137,18 +127,18 @@
           max="150" min="2"/>
       </label>
     <label>Ease function
-        <dropdown-menu selected-index="{{easeCallbackIndex}}">
+        <expand-collapse selected-index="{{easeCallbackIndex}}">
           <template is="dom-repeat" items="[[easeCallbacks]]">
             <div class="item">[[item.label]]</div>
           </template>
-        </dropdown-menu>
+        </expand-collapse>
       </label>
     <label>Preset
-      <dropdown-menu selected-index="{{presetIndex}}">
+      <expand-collapse selected-index="{{presetIndex}}">
         <template is="dom-repeat" items="[[presets]]">
           <div class="item">[[item.label]]</div>
         </template>
-      </dropdown-menu>
+      </expand-collapseu>
     </label>
     <div class="start-invisible" visible$="[[isCustomPreset]]">
       <label>From scale x

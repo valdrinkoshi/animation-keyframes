@@ -28,23 +28,23 @@
         }
       }
 
-      expand-collapse > * {
+      .item {
         padding: 10px;
         width: 200px;
         line-height: 24px;
         cursor: pointer;
       }
-
-      expand-collapse.slow[opened] {
-        --expand-collapse-content-animation-duration: 1000ms;
+      
+      .item:hover {
+        background-color: #eee;
       }
 
-      expand-collapse [selected] {
+      .item[selected] {
         background-color: lightgreen;
       }
 
-      expand-collapse > *:hover:not([selected]) {
-        background-color: #eee;
+      expand-collapse.slow[opened] {
+        --expand-collapse-content-animation-duration: 1000ms;
       }
 
       .horizontal-margin {
@@ -67,26 +67,26 @@
   </p>
 
   <expand-collapse>
-    <div selected>item 1</div>
-    <div>item 2</div>
-    <div>item 3</div>
-    <div>item 4</div>
-    <div>item 5</div>
-    <div>item 6</div>
-    <div>item 7</div>
+    <div class="item">item 1</div>
+    <div class="item">item 2</div>
+    <div class="item">item 3</div>
+    <div class="item">item 4</div>
+    <div class="item">item 5</div>
+    <div class="item">item 6</div>
+    <div class="item">item 7</div>
   </expand-collapse>
 
   <expand-collapse class="slow">
-    <div selected>
+    <div class="item" selected>
       Lorem ipsum dolor sit amet...
     </div>
-    <div class="horizontal-margin">
+    <div class="item" class="horizontal-margin">
       ...consectetur adipisicing elit. Minima...
     </div>
-    <div class="left-margin">
+    <div class="item" class="left-margin">
       ...optio, ipsa veniam eveniet maiores officiis sed minus excepturi consequuntur, id mollitia iste, repellendus similique?
     </div>
-    <div>
+    <div class="item">
       Minima laborum sed distinctio commodi delectus!
     </div>
   </expand-collapse>
