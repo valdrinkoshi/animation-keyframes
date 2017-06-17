@@ -78,7 +78,7 @@
             const selected = this.querySelector('[selected]');
             this.selectedIndex = selected ? this._computeSelectedIndex(selected) : 0;
           } else {
-            this._selectedChanged(this.selectedIndex);
+            this._selectedIndexChanged(this.selectedIndex);
           }
         });
       }
