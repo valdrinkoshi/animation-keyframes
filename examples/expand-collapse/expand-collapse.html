@@ -81,57 +81,20 @@
             this._selectedIndexChanged(this.selectedIndex);
           }
         });
+        // When dimensions change ensure we update sizes.
+        window.addEventListener('resize', () => {
+          this._resizer && cancelAnimationFrame(this._resizer);
+          this._resizer = requestAnimationFrame(() => {
+            this._resizer = null;
+            this.refit();
+          });
+        });
       }
 
-      _toggle(event) {
-        if (this.opened) {
-          let selected = event.target;
-          while (selected.parentElement !== this) {
-            selected = selected.parentElement;
-          }
-          this.opened = false;
-          const onClosed = () => {
-            this.removeEventListener('transitioning-changed', onClosed);
-            this.selectedIndex = this._computeSelectedIndex(selected);
-          };
-          this.addEventListener('transitioning-changed', onClosed);
-        } else if (this.selected) {
-          this.opened = true;
-        }
-      }
-
-      _openedChanged() {
-        const opened = !!this.opened;
-        this.$.contentWrapper.classList.toggle('expand', opened);
-        this.$.content.classList.toggle('expandInverse', opened);
-        this.$.contentWrapper.classList.toggle('collapse', !opened);
-        this.$.content.classList.toggle('collapseInverse', !opened);
-        
-        // Toggle listeners.
-        const method = this.opened ? 'addEventListener' : 'removeEventListener';
-        document.documentElement[method]('click', this._onClick);
-        document.documentElement[method]('keydown', this._onKeydown);
-
-        this.transitioning = true;
-      }
-
-      _computeSelectedIndex(selected) {
-        return Array.from(this.children).indexOf(selected);
-      }
-
-      _selectedIndexChanged(selectedIndex){
-        this._setSelected(this.children[selectedIndex]);
-      }
-
-      _selectedChanged(selected) {
-        const oldSelected = this.querySelector('[selected]');
-        if (oldSelected) {
-          oldSelected.removeAttribute('selected');
-        }
-        if (!selected) {
+      refit() {
+        if (!this.selected) {
           return;
         }
-        selected.setAttribute('selected', '');
 
         this.$.contentWrapper.hidden = false;
         // Reset styles.
@@ -141,7 +104,7 @@
           this.$.contentWrapper.style.transform = this.$.content.style.transform =
           '';
         // Learn the collapsed and expanded sizes.
-        const collapsedRect = selected.getBoundingClientRect();
+        const collapsedRect = this.selected.getBoundingClientRect();
         const expandedRect = this.$.contentWrapper.getBoundingClientRect();
         const absTop = collapsedRect.top - expandedRect.top;
         const absLeft = collapsedRect.left - expandedRect.left;
@@ -178,6 +141,59 @@
           toScaleX: scaleX,
           toScaleY: scaleY,
         });
+      }
+
+      _toggle(event) {
+        if (this.opened) {
+          let selected = event.target;
+          while (selected.parentElement !== this) {
+            selected = selected.parentElement;
+          }
+          this.opened = false;
+          const onClosed = () => {
+            this.removeEventListener('transitioning-changed', onClosed);
+            this.selectedIndex = this._computeSelectedIndex(selected);
+          };
+          this.addEventListener('transitioning-changed', onClosed);
+        } else if (this.selected) {
+          this.opened = true;
+        }
+      }
+
+      _openedChanged() {
+        const opened = !!this.opened;
+        this.$.contentWrapper.classList.toggle('expand', opened);
+        this.$.content.classList.toggle('expandInverse', opened);
+        this.$.contentWrapper.classList.toggle('collapse', !opened);
+        this.$.content.classList.toggle('collapseInverse', !opened);
+
+        // Toggle listeners.
+        const method = this.opened ? 'addEventListener' : 'removeEventListener';
+        document.documentElement[method]('click', this._onClick);
+        document.documentElement[method]('keydown', this._onKeydown);
+
+        this.transitioning = true;
+      }
+
+      _computeSelectedIndex(selected) {
+        return Array.from(this.children).indexOf(selected);
+      }
+
+      _selectedIndexChanged(selectedIndex) {
+        this._setSelected(this.children[selectedIndex]);
+      }
+
+      _selectedChanged(selected) {
+        const oldSelected = this.querySelector('[selected]');
+        if (oldSelected) {
+          oldSelected.removeAttribute('selected');
+        }
+        if (!selected) {
+          return;
+        }
+        selected.setAttribute('selected', '');
+
+        this.refit();
       }
 
       _onAnimationend(event) {
