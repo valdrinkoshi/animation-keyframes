@@ -16,7 +16,6 @@
       input[type="submit"] {
         background-color: white;
         padding: 10px;
-        border: 2px solid lightgray;
         cursor: pointer;
       }
 
@@ -62,7 +61,7 @@
       expand-collapse {
         display: block;
         z-index: 2;
-        outline: 1px solid lightgray;
+        border: 1px solid lightgray;
         --expand-collapse-content: {
           width: 100%;
           background-color: white;
@@ -95,6 +94,12 @@
       label:not(.full-width) {
         display: inline-flex;
         width: calc(25% - 3px);
+      }
+
+      @media (max-width: 500px) {
+        label:not(.full-width) {
+          width: calc(50% - 3px);
+        }
       }
 
       label>* {
