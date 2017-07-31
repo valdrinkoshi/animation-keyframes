@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+  <title>animation-keyframes</title>
+
+  <script charset="utf-8">
+    /**
+     * Adapter to use BezierEasing installed via bower.
+     */
+    (global => {
+      if (!global.module) {
+        global.module = {};
+        Object.defineProperty(global.module, 'exports', {
+          set: (mod) => global.BezierEasing = mod
+        });
+      }
+    })(this);
+  </script>
+  <script src="../bezier-easing/src/index.js"></script>
+  <script src="../webcomponentsjs/webcomponents-loader.js"></script>
+  <link rel="import" href="../animation-keyframes/animation-keyframes-editor.html">
+  <style>
+    body {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 1rem;
+      font-family: 'Roboto', Helvetica, sans-serif;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>animation-keyframes</h1>
+  <p>
+    <a href="https://github.com/valdrinkoshi/animation-keyframes/">&lt;animation-keyframes&gt;</a> generates keyframes for
+    performant expand/collapse animations. The technique consists in using scale transforms when animating clips, and prevent
+    the skewing of the content by counter-scaling it.
+    <a href="https://developers.google.com/web/updates/2017/03/performant-expand-and-collapse">See more details here</a>.
+  </p>
+  <p>
+    Some examples:
+    <ul>
+      <li><a href="../animation-keyframes/examples/dropdown-menu/">&lt;dropdown-menu&gt;</a> to overlap content on top of the
+        trigger
+      </li>
+      <li><a href="../animation-keyframes/examples/expand-collapse/">&lt;expand-collapse&gt;</a> to reveal content around the
+        trigger
+      </li>
+      <li>This page to generate animation keyframes</li>
+    </ul>
+  </p>
+
+  <h1>Animation keyframes editor</h1>
+  <animation-keyframes-editor>
+    Loading...
+  </animation-keyframes-editor>
+</body>
+
+</html>

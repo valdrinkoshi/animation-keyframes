@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+  <title>expand-collapse</title>
+
+  <script src="../../../webcomponentsjs/webcomponents-loader.js"></script>
+
+  <link rel="import" href="../../../shadycss/apply-shim.html">
+  <link rel="import" href="../../../polymer/lib/elements/custom-style.html">
+  <link rel="import" href="expand-collapse.html">
+
+  <custom-style>
+    <style>
+      body {
+        max-width: 600px;
+        margin: 0 auto;
+        font-family: 'Roboto', Helvetica, sans-serif;
+      }
+
+      expand-collapse {
+        --expand-collapse-content: {
+          background-color: white;
+          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+        }
+      }
+
+      .item {
+        padding: 10px;
+        width: 200px;
+        line-height: 24px;
+        cursor: pointer;
+      }
+      
+      .item:hover {
+        background-color: #eee;
+      }
+
+      .item[selected] {
+        background-color: lightgreen;
+      }
+
+      expand-collapse.slow[opened] {
+        --expand-collapse-content-animation-duration: 1000ms;
+      }
+
+      .horizontal-margin {
+        margin-left: 50px;
+        margin-right: 50px;
+      }
+
+      .left-margin {
+        margin-left: 100px;
+      }
+    </style>
+  </custom-style>
+</head>
+
+<body>
+
+  <h1>expand-collapse</h1>
+  <p>
+    &lt;expand-collapse&gt; expands the content around the trigger element. It leverages <a href="https://valdrinkoshi.github.io/animation-keyframes/">&lt;animation-keyframes&gt;</a>    for a performant expand/collapse animation.
+  </p>
+
+  <expand-collapse>
+    <div class="item">item 1</div>
+    <div class="item">item 2</div>
+    <div class="item">item 3</div>
+    <div class="item">item 4</div>
+    <div class="item">item 5</div>
+    <div class="item">item 6</div>
+    <div class="item">item 7</div>
+  </expand-collapse>
+
+  <expand-collapse class="slow">
+    <div class="item" selected>
+      Lorem ipsum dolor sit amet...
+    </div>
+    <div class="item horizontal-margin">
+      ...consectetur adipisicing elit. Minima...
+    </div>
+    <div class="item left-margin">
+      ...optio, ipsa veniam eveniet maiores officiis sed minus excepturi consequuntur, id mollitia iste, repellendus similique?
+    </div>
+    <div class="item">
+      Minima laborum sed distinctio commodi delectus!
+    </div>
+  </expand-collapse>
+</body>
+
+</html>

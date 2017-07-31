@@ -1,0 +1,14 @@
+{
+  "name": "bezier-easing",
+  "homepage": "https://github.com/gre/bezier-easing",
+  "version": "2.0.3",
+  "_release": "2.0.3",
+  "_resolution": {
+    "type": "version",
+    "tag": "v2.0.3",
+    "commit": "5e37480a789908bd6da7d5b6fbeacde55a1a8569"
+  },
+  "_source": "https://github.com/gre/bezier-easing.git",
+  "_target": "2.0.3",
+  "_originalSource": "gre/bezier-easing"
+}

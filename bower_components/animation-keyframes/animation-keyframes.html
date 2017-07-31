@@ -1,0 +1,249 @@
+<link rel="import" href="../polymer/polymer-element.html">
+<script>
+  class AnimationKeyframes extends Polymer.Element {
+    static get is() {
+      return 'animation-keyframes';
+    }
+    static get properties() {
+      return {
+        /** 
+         * The name to be used for the class and keyframes.
+         * The inversed animation will have "Inverse" appended to the animationName.
+         * E.g. `animationName = "myAnimation"` generates 
+         * `.myAnimation { ... } .myAnimationInverse { ... }` classes and
+         * `@keyframes myAnimation { ... } @keyframes myAnimationInverse { ... }` keyframes.
+         * @property {string}
+         */
+        animationName: {
+          type: String
+        },
+        /** 
+         * Starting horizontal scale.
+         * @property {number}
+         */
+        fromScaleX: {
+          type: Number
+        },
+        /** 
+         * Starting vertical scale.
+         * @property {number}
+         */
+        fromScaleY: {
+          type: Number
+        },
+        /** 
+         * Ending horizontal scale.
+         * @property {number}
+         */
+        toScaleX: {
+          type: Number
+        },
+        /** 
+         * Ending vertical scale.
+         * @property {number}
+         */
+        toScaleY: {
+          type: Number
+        },
+        /** 
+         * Animation duration, in milliseconds.
+         * @property {number}
+         */
+        duration: {
+          type: Number
+        },
+        /** 
+         * Frames per second.
+         * @property {number}
+         */
+        fps: {
+          type: Number,
+          value: () => 60
+        },
+        /**
+         * The ease function. Returns the eased `step`, which is passed as input.
+         * Default is a quadratic ease, override to change.
+         * Set to null to have a linear ease.
+         * @property {Function}
+         */
+        easeCallback: {
+          type: Function,
+          value: () => step => 1 - Math.pow(1 - step, 4)
+        },
+        /** 
+         * Sets from/to scale values.
+         * Supported values: `expand, collapse, vertical-expand, vertical-collapse,
+         * horizontal-expand, horizontal-collapse`.
+         * @property {string}
+         */
+        preset: {
+          type: String,
+          observer: '_presetChanged'
+        },
+        /** 
+         * Number of keyframes.
+         * @property {number}
+         */
+        framesCount: {
+          type: Number,
+          computed: '_computeFramesCount(duration, fps)'
+        },
+        /** 
+         * The computed style text content.
+         * @property {string}
+         */
+        styleTextContent: {
+          type: String,
+          notify: true,
+          computed: '_computeStyleTextContent(animationName, framesCount, fromScaleX, fromScaleY, toScaleX, toScaleY, easeCallback)',
+          observer: '_styleTextContentChanged'
+        }
+      }
+    }
+
+    connectedCallback() {
+      super.connectedCallback();
+      this.style.display = 'none';
+      if (!this._styleEl) {
+        this._styleEl = document.createElement('style');
+        this._styleEl.textContent = this.styleTextContent;
+        this.appendChild(this._styleEl);
+      }
+    }
+
+    /**
+     * @param {Number=} duration
+     * @param {Number=} fps
+     * @return {Number}
+     * @private
+     */
+    _computeFramesCount(duration, fps) {
+      return duration > 0 && fps > 0 ? Math.round(duration * fps / 1000) : 0;
+    }
+
+    /**
+     * @param {string=} animationName
+     * @param {Number=} framesCount
+     * @param {Number=} fromScaleX
+     * @param {Number=} fromScaleY
+     * @param {Number=} toScaleX
+     * @param {Number=} toScaleY
+     * @param {Function=} easeCallback
+     * @return {string}
+     * @private
+     */
+    _computeStyleTextContent(animationName, framesCount, fromScaleX, fromScaleY, toScaleX, toScaleY, easeCallback) {
+      if (!framesCount || framesCount === 1 || !animationName)
+        return '';
+      // TODO check what's the max framesCount allowed for performant animations.
+
+      const hScale = Number.isFinite(fromScaleX) && Number.isFinite(toScaleX);
+      const vScale = Number.isFinite(fromScaleY) && Number.isFinite(toScaleY);
+      if (!hScale && !vScale)
+        return '';
+      // Normalize scales to either keep their value or default to 1.
+      if (!hScale)
+        fromScaleX = toScaleX = 1;
+      if (!vScale)
+        fromScaleY = toScaleY = 1;
+
+      const animation = [];
+      const inverseAnimation = [];
+      for (let i = 0; i < framesCount; i++) {
+        const step = i / (framesCount - 1);
+        const easedStep = easeCallback ? easeCallback(step) : step;
+
+        const xScale = this._formatNumber(fromScaleX + (toScaleX - fromScaleX) * easedStep);
+        const yScale = this._formatNumber(fromScaleY + (toScaleY - fromScaleY) * easedStep);
+        const invScaleX = xScale !== 0 ? this._formatNumber(1 / xScale) : 1000;
+        const invScaleY = yScale !== 0 ? this._formatNumber(1 / yScale) : 1000;
+
+        const percentage = this._formatNumber(100 * step);
+
+        let scale, scaleInverse;
+        if (fromScaleX === toScaleX && toScaleX === 1) {
+          // Only scaleY
+          scale = `scaleY(${yScale})`;
+          scaleInverse = `scaleY(${invScaleY})`;
+        } else if (fromScaleY === toScaleY && fromScaleY === 1) {
+          // Only scaleX
+          scale = `scaleX(${xScale})`;
+          scaleInverse = `scaleX(${invScaleX})`;
+        } else {
+          scale = `scale(${xScale}, ${yScale})`;
+          scaleInverse = `scale(${invScaleX}, ${invScaleY})`;
+        }
+        animation.push(
+          `
+  ${percentage}% {
+    transform: ${scale};
+  }`);
+
+        inverseAnimation.push(
+          `
+  ${percentage}% {
+    transform: ${scaleInverse};
+  }`);
+      }
+      return `.${animationName} {
+  overflow: hidden;
+  will-change: transform;
+  contain: content;
+  animation-name: ${animationName};
+  animation-duration: ${this.duration}ms;
+  animation-timing-function: step-end;
+}
+
+.${animationName}Inverse {
+  will-change: transform;
+  contain: content;
+  animation-name: ${animationName}Inverse;
+  animation-duration: ${this.duration}ms;
+  animation-timing-function: step-end;
+}
+
+@keyframes ${animationName} {${animation.join('')}
+}
+
+@keyframes ${animationName}Inverse {${inverseAnimation.join('')}
+}`;
+    }
+
+    _formatNumber(num) {
+      return Number(num.toFixed(5));
+    }
+
+    /**
+     * Updates the style element's text content.
+     * @param {string=} content
+     * @private
+     */
+    _styleTextContentChanged(content) {
+      if (this._styleEl)
+        this._styleEl.textContent = content;
+    }
+
+    /**
+     * Sets the from/to scale values if `preset` has a valid value.
+     * @param {string=} preset
+     * @private
+     */
+    _presetChanged(preset) {
+      if (!preset)
+        return;
+      const expand = preset.endsWith('expand');
+      const collapse = preset.endsWith('collapse');
+      if (!expand && !collapse)
+        return;
+      const hScale = preset.startsWith('vertical-') === false;
+      const vScale = preset.startsWith('horizontal-') === false;
+      this.setProperties({
+        fromScaleX: Number(!hScale || collapse),
+        toScaleX: Number(!hScale || expand),
+        fromScaleY: Number(!vScale || collapse),
+        toScaleY: Number(!vScale || expand)
+      });
+    }
+  }
+  customElements.define(AnimationKeyframes.is, AnimationKeyframes);
+</script>

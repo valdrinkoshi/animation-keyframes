@@ -1,0 +1,185 @@
+<link rel="import" href="../../../polymer/polymer-element.html">
+
+<dom-module id="dropdown-menu">
+  <template>
+    <link rel="stylesheet" href$="[[importPath]]vertical-expand-keyframes.css">
+    <style>
+       :host {
+        display: inline-block;
+        position: relative;
+        cursor: pointer;
+      }
+
+      #trigger {
+        cursor: pointer;
+        border: none;
+        background-color: transparent;
+        width: 100%;
+        height: 100%;
+        @apply --dropdown-menu-trigger;
+      }
+
+      #contentWrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        will-change: opacity, transform;
+        @apply --dropdown-menu-content;
+        @apply --dropdown-menu-content-position;
+      }
+
+      #contentWrapper,
+      #content {
+        animation-duration: var(--dropdown-menu-content-animation-duration, 200ms);
+        transform-origin: var(--dropdown-menu-content-transform-origin, top left);
+      }
+
+      #contentWrapper:not(.opened) {
+        animation-name: fadeOut;
+        animation-timing-function: ease-in-out;
+      }
+
+      #contentWrapper:not(.opened) #content {
+        animation-name: none;
+      }
+
+      #contentWrapper:not(.opened):not(.transitioning) {
+        transform: scaleY(0);
+        animation-name: none;
+      }
+
+      @keyframes fadeOut {
+        to {
+          opacity: 0;
+        }
+      }
+    </style>
+
+    <button id="trigger" on-click="_toggle">Toggle</button>
+    <div id="contentWrapper" class="verticalExpand" on-animationend="_onAnimationend">
+      <div id="content" class="verticalExpandInverse" on-click="_updateSelected">
+        <slot></slot>
+      </div>
+    </div>
+  </template>
+  <script>
+    class DropdownMenu extends Polymer.Element {
+      static get is() {
+        return 'dropdown-menu';
+      }
+      static get properties() {
+        return {
+          opened: {
+            type: Boolean,
+            notify: true,
+            reflectToAttribute: true,
+            observer: '_openedChanged'
+          },
+          selectedIndex: {
+            type: Number,
+            notify: true,
+            observer: '_selectedIndexChanged'
+          },
+          selected: {
+            type: Element,
+            notify: true,
+            readOnly: true,
+            observer: '_selectedChanged'
+          },
+          transitioning: {
+            type: Boolean,
+            notify: true
+          }
+        }
+      }
+
+      ready() {
+        super.ready();
+        this._onClick = this._onClick.bind(this);
+        this._onKeydown = this._onKeydown.bind(this);
+        // Wait next render for distribution.
+        requestAnimationFrame(() => {
+          if (this.selectedIndex == undefined) {
+            const selected = this.querySelector('[selected]');
+            this.selectedIndex = selected ? this._computeSelectedIndex(selected) : 0;
+          } else {
+            this._selectedIndexChanged(this.selectedIndex);
+          }
+        });
+      }
+
+      _toggle() {
+        this.opened = !this.opened;
+      }
+
+      _updateSelected(event) {
+        let selected = event.target;
+        while (selected.parentElement !== this) {
+          selected = selected.parentElement;
+        }
+        this.opened = false;
+        const onClosed = () => {
+          this.removeEventListener('transitioning-changed', onClosed);
+          this.selectedIndex = this._computeSelectedIndex(selected);
+        };
+        this.addEventListener('transitioning-changed', onClosed);
+        event.preventDefault();
+      }
+
+      _openedChanged() {
+        this.$.contentWrapper.classList.toggle('opened', !!this.opened);
+        this.$.contentWrapper.classList.add('transitioning');
+
+        // Toggle listeners.
+        const method = this.opened ? 'addEventListener' : 'removeEventListener';
+        document.documentElement[method]('click', this._onClick);
+        document.documentElement[method]('keydown', this._onKeydown);
+
+        this.transitioning = true;
+      }
+
+      _computeSelectedIndex(selected) {
+        return Array.from(this.children).indexOf(selected);
+      }
+
+      _selectedIndexChanged(selectedIndex){
+        this._setSelected(this.children[selectedIndex]);
+      }
+
+      _selectedChanged(selected) {
+        const oldSelected = this.querySelector('[selected]');
+        if (oldSelected) {
+          oldSelected.removeAttribute('selected');
+        }
+        if (selected) {
+          selected.setAttribute('selected', '');
+        }
+        this.$.trigger.textContent = selected ? selected.textContent : 'Toggle';
+      }
+
+      _onAnimationend(event) {
+        if (event.target === this.$.contentWrapper) {
+          // Update transform.
+          this.$.contentWrapper.style.transform = `scaleY(${getComputedStyle(this.$.contentWrapper).transform})`;
+          this.$.content.style.transform = `scaleY(${getComputedStyle(this.$.content).transform})`;
+          this.$.contentWrapper.classList.remove('transitioning');
+          this.transitioning = false;
+        }
+      }
+
+      _onClick(event) {
+        if (event.composedPath().indexOf(this) === -1) {
+          this.opened = false;
+        }
+      }
+
+      _onKeydown(event) {
+        if (event.keyCode === 27) {
+          this.opened = false;
+        }
+      }
+    }
+    customElements.define(DropdownMenu.is, DropdownMenu);
+  </script>
+</dom-module>

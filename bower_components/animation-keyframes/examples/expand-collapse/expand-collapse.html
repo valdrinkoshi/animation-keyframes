@@ -1,0 +1,222 @@
+<link rel="import" href="../../../polymer/polymer-element.html">
+<link rel="import" href="../../animation-keyframes.html">
+
+<dom-module id="expand-collapse">
+  <template>
+    <style>
+       :host {
+        display: inline-block;
+        position: relative;
+      }
+
+       :host([opened]),
+       :host([transitioning]) {
+        z-index: 1;
+      }
+
+      #contentWrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
+        @apply --expand-collapse-content;
+      }
+
+      #contentWrapper,
+      #content {
+        overflow: hidden;
+        animation-duration: var(--expand-collapse-content-animation-duration, 200ms);
+      }
+    </style>
+    <animation-keyframes id="expand" animation-name="expand" duration="1000"></animation-keyframes>
+    <animation-keyframes id="collapse" animation-name="collapse" duration="1000"></animation-keyframes>
+
+    <div id="contentWrapper" hidden on-animationend="_onAnimationend">
+      <div id="content" on-click="_toggle">
+        <slot></slot>
+      </div>
+    </div>
+  </template>
+  <script>
+    class ExpandCollapse extends Polymer.Element {
+      static get is() {
+        return 'expand-collapse';
+      }
+      static get properties() {
+        return {
+          opened: {
+            type: Boolean,
+            notify: true,
+            reflectToAttribute: true,
+            observer: '_openedChanged'
+          },
+          selectedIndex: {
+            type: Number,
+            notify: true,
+            observer: '_selectedIndexChanged'
+          },
+          selected: {
+            type: Element,
+            notify: true,
+            readOnly: true,
+            observer: '_selectedChanged'
+          },
+          transitioning: {
+            type: Boolean,
+            notify: true,
+            reflectToAttribute: true
+          }
+        }
+      }
+
+      ready() {
+        super.ready();
+        this._onClick = this._onClick.bind(this);
+        this._onKeydown = this._onKeydown.bind(this);
+        // Wait next render to safely calculate layout info.
+        requestAnimationFrame(() => {
+          if (this.selectedIndex == undefined) {
+            const selected = this.querySelector('[selected]');
+            this.selectedIndex = selected ? this._computeSelectedIndex(selected) : 0;
+          } else {
+            this._selectedIndexChanged(this.selectedIndex);
+          }
+        });
+        // When dimensions change ensure we update sizes.
+        window.addEventListener('resize', () => {
+          this._resizer && cancelAnimationFrame(this._resizer);
+          this._resizer = requestAnimationFrame(() => {
+            this._resizer = null;
+            this.refit();
+          });
+        });
+      }
+
+      refit() {
+        if (!this.selected) {
+          return;
+        }
+
+        this.$.contentWrapper.hidden = false;
+        // Reset styles.
+        this.style.width = this.style.height =
+          this.$.contentWrapper.style.top = this.$.contentWrapper.style.left =
+          this.$.contentWrapper.style.transformOrigin = this.$.content.style.transformOrigin =
+          this.$.contentWrapper.style.transform = this.$.content.style.transform =
+          '';
+        // Learn the collapsed and expanded sizes.
+        const collapsedRect = this.selected.getBoundingClientRect();
+        const expandedRect = this.$.contentWrapper.getBoundingClientRect();
+        const absTop = collapsedRect.top - expandedRect.top;
+        const absLeft = collapsedRect.left - expandedRect.left;
+        // Compute the transform-origin around the selected.
+        const anchorX = expandedRect.width === collapsedRect.width ? 0 :
+          100 * absLeft / (expandedRect.width - collapsedRect.width);
+        const anchorY = expandedRect.height === collapsedRect.height ? 0 :
+          100 * absTop / (expandedRect.height - collapsedRect.height);
+        // Compute the scales.
+        const scaleX = collapsedRect.width / expandedRect.width;
+        const scaleY = collapsedRect.height / expandedRect.height;
+        // Set the collapsed size on the host.
+        this.style.width = collapsedRect.width + 'px';
+        this.style.height = collapsedRect.height + 'px';
+        // Align wrapper to show selected when expanded.
+        this.$.contentWrapper.style.top = -absTop + 'px';
+        this.$.contentWrapper.style.left = -absLeft + 'px';
+        // Adjust anchor point and transform.
+        this.$.contentWrapper.style.transformOrigin =
+          this.$.content.style.transformOrigin =
+          `${anchorX}% ${anchorY}%`;
+        this.$.contentWrapper.style.transform = this.opened ? '' : `scale(${scaleX}, ${scaleY})`;
+        this.$.content.style.transform = this.opened ? '' : `scale(${1/scaleX}, ${1/scaleY})`;
+
+        this.$.expand.setProperties({
+          fromScaleX: scaleX,
+          fromScaleY: scaleY,
+          toScaleX: 1,
+          toScaleY: 1,
+        });
+        this.$.collapse.setProperties({
+          fromScaleX: 1,
+          fromScaleY: 1,
+          toScaleX: scaleX,
+          toScaleY: scaleY,
+        });
+      }
+
+      _toggle(event) {
+        if (this.opened) {
+          let selected = event.target;
+          while (selected.parentElement !== this) {
+            selected = selected.parentElement;
+          }
+          this.opened = false;
+          const onClosed = () => {
+            this.removeEventListener('transitioning-changed', onClosed);
+            this.selectedIndex = this._computeSelectedIndex(selected);
+          };
+          this.addEventListener('transitioning-changed', onClosed);
+        } else if (this.selected) {
+          this.opened = true;
+        }
+      }
+
+      _openedChanged() {
+        const opened = !!this.opened;
+        this.$.contentWrapper.classList.toggle('expand', opened);
+        this.$.content.classList.toggle('expandInverse', opened);
+        this.$.contentWrapper.classList.toggle('collapse', !opened);
+        this.$.content.classList.toggle('collapseInverse', !opened);
+
+        // Toggle listeners.
+        const method = this.opened ? 'addEventListener' : 'removeEventListener';
+        document.documentElement[method]('click', this._onClick);
+        document.documentElement[method]('keydown', this._onKeydown);
+
+        this.transitioning = true;
+      }
+
+      _computeSelectedIndex(selected) {
+        return Array.from(this.children).indexOf(selected);
+      }
+
+      _selectedIndexChanged(selectedIndex) {
+        this._setSelected(this.children[selectedIndex]);
+      }
+
+      _selectedChanged(selected) {
+        const oldSelected = this.querySelector('[selected]');
+        if (oldSelected) {
+          oldSelected.removeAttribute('selected');
+        }
+        if (!selected) {
+          return;
+        }
+        selected.setAttribute('selected', '');
+
+        this.refit();
+      }
+
+      _onAnimationend(event) {
+        if (event.target === this.$.contentWrapper) {
+          const scaleTarget = this.opened ? this.$.expand : this.$.collapse;
+          this.$.contentWrapper.style.transform = `scale(${scaleTarget.toScaleX}, ${scaleTarget.toScaleY})`;
+          this.$.content.style.transform = `scale(${1/scaleTarget.toScaleX}, ${1/scaleTarget.toScaleY})`;
+          this.transitioning = false;
+        }
+      }
+
+      _onClick(event) {
+        if (event.composedPath().indexOf(this) === -1) {
+          this.opened = false;
+        }
+      }
+
+      _onKeydown(event) {
+        if (event.keyCode === 27) {
+          this.opened = false;
+        }
+      }
+    }
+    customElements.define(ExpandCollapse.is, ExpandCollapse);
+  </script>
+</dom-module>

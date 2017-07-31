@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+  <title>animation-keyframes test</title>
+
+  <script src="../../webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../animation-keyframes.html">
+
+</head>
+
+<body>
+
+  <test-fixture id="BasicTestFixture">
+    <template>
+      <animation-keyframes></animation-keyframes>
+    </template>
+  </test-fixture>
+
+  <test-fixture id="VerticalExpand">
+    <template>
+      <animation-keyframes animation-name="myAnimation" preset="vertical-expand" duration="30"></animation-keyframes>
+    </template>
+  </test-fixture>
+
+  <script>
+    suite('animation-keyframes', function() {
+
+      test('instantiating the element with default properties works', function() {
+        var element = fixture('BasicTestFixture');
+        assert.equal(element.framesCount, 0);
+        assert.equal(element.querySelector('style').textContent, element.styleTextContent);
+        assert.equal(element.styleTextContent, '');
+      });
+
+      test('setting a property on the element works', function() {
+        var element = fixture('VerticalExpand');
+        assert.equal(element.framesCount, 2);
+        assert.equal(element.querySelector('style').textContent, element.styleTextContent);
+        assert.equal(element.styleTextContent,
+          `.myAnimation {
+  overflow: hidden;
+  will-change: transform;
+  contain: content;
+  animation-name: myAnimation;
+  animation-duration: 30ms;
+  animation-timing-function: step-end;
+}
+
+.myAnimationInverse {
+  will-change: transform;
+  contain: content;
+  animation-name: myAnimationInverse;
+  animation-duration: 30ms;
+  animation-timing-function: step-end;
+}
+
+@keyframes myAnimation {
+  0% {
+    transform: scaleY(0);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes myAnimationInverse {
+  0% {
+    transform: scaleY(1000);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}`
+        );
+      });
+
+    });
+  </script>
+
+</body>
+
+</html>

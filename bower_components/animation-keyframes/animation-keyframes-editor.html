@@ -1,0 +1,522 @@
+<link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../polymer/lib/elements/dom-repeat.html">
+<link rel="import" href="../shadycss/apply-shim.html">
+<link rel="import" href="examples/expand-collapse/expand-collapse.html">
+<link rel="import" href="animation-keyframes.html">
+
+<dom-module id="animation-keyframes-editor">
+  <template>
+    <style>
+       :host {
+        display: block;
+        padding-bottom: 50px;
+      }
+
+      button,
+      input[type="submit"] {
+        background-color: white;
+        padding: 10px;
+        cursor: pointer;
+      }
+
+      #raw {
+        padding: 10px;
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+        background-color: #f5f5f5;
+        overflow: auto;
+      }
+
+      #animationWrapper,
+      #codeWrapper {
+        position: relative;
+        margin-top: 20px;
+      }
+
+      #animationWrapper>button,
+      #codeWrapper>form {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 1;
+      }
+
+      #wrapper {
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+        background-color: #f5f5f5;
+      }
+
+      #content {
+        padding: 10px;
+      }
+
+      .start-invisible:not([visible]) {
+        display: none;
+      }
+
+      #play:not([disabled])+#wrapper,
+      #play:not([disabled])+#wrapper #content {
+        animation-name: none !important;
+      }
+
+      expand-collapse {
+        display: block;
+        z-index: 2;
+        border: 1px solid lightgray;
+        --expand-collapse-content: {
+          width: 100%;
+          background-color: white;
+          outline: 1px solid lightgray;
+        }
+      }
+
+      .item {
+        line-height: 24px;
+        padding: 10px;
+        font-size: 14px;
+        background-color: white;
+        cursor: pointer;
+      }
+      
+      expand-collapse:not([opened]) .item[selected]::after {
+        content: '▾';
+        float: right;
+      }
+
+      expand-collapse[opened] .item[selected],
+      expand-collapse[transitioning] .item[selected] {
+        background-color: lightgreen;
+      }
+
+      .item:hover:not([selected]) {
+        background-color: #eee;
+      }
+
+      label {
+        display: flex;
+        flex-direction: column;
+      }
+
+      label:not(.full-width) {
+        display: inline-flex;
+        width: calc(25% - 3px);
+      }
+
+      @media (max-width: 500px) {
+        label:not(.full-width) {
+          width: calc(50% - 3px);
+        }
+      }
+
+      label>* {
+        margin: 10px 0;
+        width: 100%;
+      }
+
+      input,
+      button,
+      textarea {
+        padding: 10px;
+        outline: none;
+        border: 1px solid lightgray;
+        font-size: 14px;
+        box-sizing: border-box;
+        line-height: 24px;
+        resize: none;
+      }
+    </style>
+    <label>Animation name
+        <input name="animationName" required value="[[animationName]]" on-change="validateAndUpdateValue"
+          allowed-pattern="[a-zA-Z]" minlength="1">
+      </label>
+    <label>Duration (ms)
+        <input name="duration" type="number" required value="[[duration]]" on-change="validateAndUpdateValue"
+          allowed-pattern="[0-9]" max="10000" min="2" />
+      </label>
+    <label>FPS
+        <input name="fps" type="number" required value="[[fps]]" on-change="validateAndUpdateValue" allowed-pattern="[0-9]"
+          max="150" min="2"/>
+      </label>
+    <label>Ease function
+        <expand-collapse selected-index="{{easeCallbackIndex}}">
+          <template is="dom-repeat" items="[[easeCallbacks]]">
+            <div class="item">[[item.label]]</div>
+          </template>
+        </expand-collapse>
+      </label>
+    <label>Preset
+      <expand-collapse selected-index="{{presetIndex}}">
+        <template is="dom-repeat" items="[[presets]]">
+          <div class="item">[[item.label]]</div>
+        </template>
+      </expand-collapseu>
+    </label>
+    <div class="start-invisible" visible$="[[isCustomPreset]]">
+      <label>From scale x
+        <input name="fromScaleX" type="number" required value="[[fromScaleX]]" on-change="validateAndUpdateValue" allowed-pattern="[0-9\.]"
+          max="10" min="0" step="0.05" />
+      </label>
+      <label>To scale x
+        <input name="toScaleX" type="number" required value="[[toScaleX]]" on-change="validateAndUpdateValue" allowed-pattern="[0-9\.]"
+          max="10" min="0" step="0.05" />
+      </label>
+      <label>From scale y
+        <input name="fromScaleY" type="number" required value="[[fromScaleY]]" on-change="validateAndUpdateValue" allowed-pattern="[0-9\.]"
+          max="10" min="0" step="0.05" />
+      </label>
+      <label>To scale y
+        <input name="toScaleY" type="number" required value="[[toScaleY]]" on-change="validateAndUpdateValue" allowed-pattern="[0-9\.]"
+          max="10" min="0" step="0.05" />
+      </label>
+    </div>
+    <label class="full-width">
+      Custom styles
+      <textarea rows="3" name="customizedStyles" value="[[customizedStyles]]" on-change="validateAndUpdateValue"></textarea>
+    </label>
+
+    <animation-keyframes id="keyframes" animation-name="[[animationName]]" duration="[[duration]]" preset="[[preset]]" fps="[[fps]]"
+      from-scale-x="[[fromScaleX]]" to-scale-x="[[toScaleX]]" from-scale-y="[[fromScaleY]]" to-scale-y="[[toScaleY]]" ease-callback="[[easeCallback]]"
+      style-text-content="{{styleTextContent}}"></animation-keyframes>
+
+    <div id="animationWrapper">
+      <button id="play" on-click="play">Play animation</button>
+      <div id="wrapper" class$="[[animationName]]" on-animationend="stop">
+        <div id="content" contenteditable class$="[[animationNameInverse]]">
+          <h3>Performant [[preset]] animation!</h3>
+          <p>This content is editable! Try modifying it while the animation is playing!</p>
+          <ul>
+            <li>item 1</li>
+            <li>item 2</li>
+            <li>item 3</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <p>
+      Apply <b>[[animationName]]</b> class to the wrapper element, and <b>[[animationNameInverse]]</b> class to the content.
+    </p>
+
+    <p>
+      <a id="download" target="_blank">[[animationName]].css</a>: <code id="counter"></code>
+    </p>
+
+    <div id="codeWrapper">
+      <form action="https://jsfiddle.net/api/post/library/pure/" method="post" target="_blank">
+        <input type="hidden" name="css" value="[[markdown]]">
+        <input type="hidden" name="html" value="[[jsFiddleHTML]]">
+        <input type="hidden" name="js" value="[[jsFiddleJS]]">
+        <input type="submit" value="Export to JSFiddle">
+      </form>
+      <pre id="raw"></pre>
+    </div>
+  </template>
+  <script>
+    (() => {
+      const hashableProps = {
+        animationName: 'myAnimation',
+        duration: 200,
+        fps: 60,
+        presetIndex: 0,
+        easeCallbackIndex: 0,
+        fromScaleX: 1,
+        fromScaleY: 1,
+        toScaleX: 1,
+        toScaleY: 0,
+        customizedStyles: `transform-origin: left top;
+animation-fill-mode: both;
+animation-delay: 200ms;`,
+      };
+      // Read values from url.
+      location.hash.replace(/^#/g, '').split('&').forEach(param => {
+        const params = param.split('=');
+        if (params.length === 2) {
+          const property = decodeURI(params[0]);
+          const value = decodeURI(params[1]);
+          if (property in hashableProps && value) {
+            hashableProps[property] = typeof hashableProps[property] === 'number' ? Number(value) : value;
+          }
+        }
+      });
+
+      class AnimationKeyframesEditor extends Polymer.Element {
+        static get is() {
+          return 'animation-keyframes-editor';
+        }
+        static get properties() {
+          return {
+            animationName: {
+              type: String,
+              value: () => hashableProps.animationName,
+            },
+            presetIndex: {
+              type: Number,
+              value: () => hashableProps.presetIndex,
+            },
+            fromScaleX: {
+              type: Number,
+              value: () => hashableProps.fromScaleX,
+            },
+            fromScaleY: {
+              type: Number,
+              value: () => hashableProps.fromScaleY,
+            },
+            toScaleX: {
+              type: Number,
+              value: () => hashableProps.toScaleX,
+            },
+            toScaleY: {
+              type: Number,
+              value: () => hashableProps.toScaleY,
+            },
+            duration: {
+              type: Number,
+              value: () => hashableProps.duration,
+            },
+            fps: {
+              type: Number,
+              value: () => hashableProps.fps,
+            },
+            easeCallbackIndex: {
+              type: Number,
+              value: () => hashableProps.easeCallbackIndex,
+            },
+            customizedStyles: {
+              type: String,
+              value: () => hashableProps.customizedStyles,
+            },
+            animationNameInverse: {
+              type: String,
+              computed: 'computeAnimationNameInverse(animationName)'
+            },
+            preset: {
+              type: String,
+              computed: 'getValueFromArray(presets, presetIndex)'
+            },
+            isCustomPreset: {
+              type: Boolean,
+              computed: 'computeIsCustomPreset(preset)',
+              observer: 'isCustomPresetChanged'
+            },
+            easeCallback: {
+              type: Function,
+              computed: 'getValueFromArray(easeCallbacks, easeCallbackIndex)'
+            },
+            styleTextContent: {
+              type: String
+            },
+            customStyleTextContent: {
+              type: String,
+              computed: 'computeCustomStyleTextContent(animationName, customizedStyles)'
+            },
+            markdown: {
+              type: String,
+              computed: 'computeMarkdown(customStyleTextContent, styleTextContent)',
+              observer: 'markdownChanged'
+            },
+            presets: {
+              type: Array,
+              readOnly: true,
+              value: () => [{
+                label: 'vertical expand',
+                value: 'vertical-expand'
+              }, {
+                label: 'vertical collapse',
+                value: 'vertical-collapse'
+              }, {
+                label: 'horizontal expand',
+                value: 'horizontal-expand'
+              }, {
+                label: 'horizontal collapse',
+                value: 'horizontal-collapse'
+              }, {
+                label: 'expand',
+                value: 'expand'
+              }, {
+                label: 'collapse',
+                value: 'collapse'
+              }, {
+                label: 'custom',
+                value: null
+              }]
+            },
+            easeCallbacks: {
+              type: Array,
+              readOnly: true,
+              value: () => [{
+                label: 'default',
+                value: step => 1 - Math.pow(1 - step, 4)
+              }, {
+                label: 'linear',
+                value: null
+              }, {
+                label: 'ease',
+                value: BezierEasing(.25, .1, .25, 1)
+              }, {
+                label: 'ease-in',
+                value: BezierEasing(.42, 0, 1, 1)
+              }, {
+                label: 'ease-out',
+                value: BezierEasing(0, 0, .58, 1)
+              }, {
+                label: 'ease-in-out',
+                value: BezierEasing(.42, 0, .58, 1)
+              }]
+            },
+            jsFiddleHTML: {
+              type: String,
+              readOnly: true,
+            },
+            jsFiddleJS: {
+              type: String,
+              readOnly: true,
+              value: `var play, wrapper, content;
+requestAnimationFrame(init);
+
+function init() {
+  play = document.getElementById('play');
+  wrapper = document.getElementById('wrapper');
+  content = document.getElementById('content');
+  play.addEventListener('click', playAnimation);
+  wrapper.addEventListener('animationend', animationDone);
+  animationDone();
+}
+
+function playAnimation() {
+	play.disabled = true;
+  wrapper.style.animationName = content.style.animationName = '';
+}
+
+function animationDone() {
+  play.disabled = false;
+  wrapper.style.animationName = content.style.animationName = 'none';
+}`
+            }
+          }
+        }
+
+        computeAnimationNameInverse(animationName) {
+          if (animationName)
+            return animationName + 'Inverse';
+        }
+
+        computeIsCustomPreset(preset) {
+          return preset === null;
+        }
+
+        computeCustomStyleTextContent(animationName, customizedStyles) {
+          if (animationName && customizedStyles)
+            return `.${animationName}, .${animationName}Inverse {
+  ${customizedStyles.replace(/\n/g,'\n  ')}
+}
+
+`;
+        }
+
+        computeMarkdown(customStyleTextContent, styleTextContent) {
+          if (customStyleTextContent || styleTextContent)
+            return (customStyleTextContent || '') + (styleTextContent || '');
+        }
+
+        markdownChanged() {
+          this._markdownRaf && cancelAnimationFrame(this._markdownRaf);
+          this._markdownRaf = requestAnimationFrame(() => {
+            this.$.counter.textContent = this.markdown ?
+              `${this.$.keyframes.framesCount} keyframes, ${this.markdown.split(/\n/).length - 1} lines, ${this.markdown.length} chars.` :
+              '';
+            if (!this.$.customStyle) {
+              this.$.customStyle = document.createElement('style');
+              this.shadowRoot.appendChild(this.$.customStyle);
+            }
+            this.$.customStyle.textContent = this.customStyleTextContent || '';
+            this.$.raw.innerHTML = this.markdown;
+            this.$.download.download = this.animationName + '.css';
+            this.$.download.href = 'data:text/css,' + this.markdown;
+            this._setJsFiddleHTML(this.$.animationWrapper.innerHTML);
+            this.updateHash();
+            this._canUpdateHash = true;
+          });
+        }
+
+        updateHash() {
+          if (!this._canUpdateHash) return;
+          // Avoid writing too many times in the history.
+          this._hashRaf && clearTimeout(this._hashRaf);
+          this._hashRaf = setTimeout(() => {
+            let hash = [
+              `animationName=${this.animationName}`,
+              `duration=${this.duration}`,
+              `fps=${this.fps}`,
+              `presetIndex=${this.presetIndex}`,
+              `easeCallbackIndex=${this.easeCallbackIndex}`,
+            ];
+            if (this.isCustomPreset) {
+              hash = hash.concat([
+                `fromScaleX=${this.fromScaleX}`,
+                `fromScaleY=${this.fromScaleY}`,
+                `toScaleX=${this.toScaleX}`,
+                `toScaleY=${this.toScaleY}`,
+              ]);
+            }
+            if (this.customizedStyles) {
+              hash.push(`customizedStyles=${this.customizedStyles}`);
+            }
+            location.hash = hash.join('&');
+          }, 500);
+        }
+
+        getValueFromArray(array, index) {
+          if (array && index >= 0)
+            return array[index].value;
+        }
+
+        isCustomPresetChanged(isCustomPreset) {
+          if (isCustomPreset) {
+            this.fromScaleX = this.$.keyframes.fromScaleX;
+            this.fromScaleY = this.$.keyframes.fromScaleY;
+            this.toScaleX = this.$.keyframes.toScaleX;
+            this.toScaleY = this.$.keyframes.toScaleY;
+          } else {
+            this.updateHash();
+          }
+        }
+
+        play() {
+          requestAnimationFrame(() => this.$.play.disabled = true);
+        }
+
+        stop() {
+          setTimeout(() => this.$.play.disabled = false, 200);
+        }
+
+        validateAndUpdateValue(event) {
+          const input = event.target;
+          if (input.checkValidity())
+            requestAnimationFrame(() => this[input.name] = (input.type === 'number' ? Number(input.value) : input
+              .value));
+        }
+
+        copyToClipboard() {
+          // From https://github.com/google/material-design-lite/blob/master/docs/_assets/snippets.js
+          const snipRange = document.createRange();
+          snipRange.selectNodeContents(this.$.code);
+          const selection = window.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(snipRange);
+          let result = false;
+          try {
+            result = document.execCommand('copy');
+          } catch (err) {
+            // Copy command is not available
+            console.error(err);
+          }
+          // Return to the copy button after a second.
+          this.$.copyButton.disabled = true;
+          setTimeout(() => this.$.copyButton.disabled = false, 1000);
+          selection.removeAllRanges();
+          return result;
+        }
+      }
+      customElements.define(AnimationKeyframesEditor.is, AnimationKeyframesEditor);
+    })();
+  </script>
+</dom-module>
