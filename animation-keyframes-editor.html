@@ -76,6 +76,11 @@
         background-color: white;
         cursor: pointer;
       }
+      
+      expand-collapse:not([opened]) .item[selected]::after {
+        content: '▾';
+        float: right;
+      }
 
       expand-collapse[opened] .item[selected],
       expand-collapse[transitioning] .item[selected] {
